@@ -1,0 +1,129 @@
+================================================================================
+MUSICIAN PORTFOLIO WEBSITE - PROJECT INSTRUCTIONS & REFERENCE
+================================================================================
+Created: March 9, 2025
+Project: Franchico - Creative Portfolio for Musician/Producer/Content Creator
+
+================================================================================
+ARTIST PROFILE
+================================================================================
+- Musician (bassist, guitarist, drummer)
+- Producer
+- Content Creator (reels, shorts, tiktoks)
+
+================================================================================
+CORE FEATURES (REQUIRED)
+================================================================================
+1. MODULAR WINDOW INTERFACE
+   - All pages can be opened simultaneously as separate windows
+   - Each page is a draggable, resizable window
+   - Windows can overlap and be repositioned freely
+
+2. PAGES TO IMPLEMENT
+   - Home/Landing
+   - Gallery (pictures/photos)
+   - Music Player (pop-up, draggable)
+   - Reels/Shorts/TikToks (video content)
+   - About (artist bio, info)
+
+3. INTERACTION MODEL
+   - All pages: scrollable AND draggable
+   - Creative, interactive approach
+   - Draggable interface throughout
+
+================================================================================
+STYLE REFERENCE - MAIN
+================================================================================
+Website: https://www.gmbgraphic.com/#
+Designer: Guillaume Maurin-Belay (Graphic Designer)
+
+KEY STYLE ELEMENTS TO ADAPT:
+- Minimal, bold typography
+- Dark/neutral color palette with accent colors
+- Clean, editorial layout
+- Split/duo typography (e.g., "GUILLAUME" / "MAURIN-BELAY")
+- Grid-based project showcase
+- "COMING SOON" / "view work" CTAs
+- Video/showreel integration
+- Subtle animations and transitions
+- Professional, creative aesthetic
+- Contact section with email/instagram
+- Based in [location] tagline
+
+TECHNOLOGY INSPIRATION (creative portfolio sites):
+- React / Vite for fast development
+- Framer Motion for animations
+- Tailwind CSS for styling
+- Modular component architecture
+
+================================================================================
+MUSIC PLAYER REFERENCE - ONLY
+================================================================================
+Website: https://www.sosoradio.co
+
+KEY ELEMENTS TO ADAPT (music player only):
+- Retro/desktop window aesthetic
+- Draggable player window
+- Playlist display
+- Volume controls
+- Track info display
+- Minimal, functional UI
+- Window chrome (title bar, close button)
+
+NOTE: Use sosoradio ONLY as reference for the music player component.
+Do NOT copy the full site design - only the music player concept.
+
+================================================================================
+TECH STACK
+================================================================================
+- React 18
+- Vite (build tool)
+- Tailwind CSS
+- Framer Motion (animations)
+- react-draggable (draggable windows)
+- Howler.js or HTML5 Audio API (music playback)
+
+================================================================================
+PROJECT STRUCTURE (PLANNED)
+================================================================================
+src/
+  components/
+    Window/           # Draggable window wrapper
+    MusicPlayer/      # Draggable music player (sosoradio-inspired)
+    Gallery/          # Photo gallery
+    Reels/            # Video reels/shorts
+    About/            # About page content
+  pages/              # Page content components
+  hooks/              # Custom hooks (useWindow, etc.)
+  styles/
+  App.jsx
+  main.jsx
+
+================================================================================
+DEVELOPMENT COMMANDS
+================================================================================
+npm install          # Install dependencies
+npm run dev          # Start development server
+npm run build        # Production build
+npm run preview      # Preview production build
+
+================================================================================
+SPOTIFY EMBEDS (Music Section)
+================================================================================
+Edit SPOTIFY_EMBEDS in App.jsx. Add your album/playlist/track IDs:
+- Album: https://open.spotify.com/album/XXX -> id: XXX
+- Playlist: https://open.spotify.com/playlist/XXX -> id: XXX
+- Track: https://open.spotify.com/track/XXX -> id: XXX
+
+The music player (Win95 style) is a free-floating element, independent of sections.
+
+================================================================================
+NOTES
+================================================================================
+- Prioritize creative, distinctive design over generic AI aesthetics
+- Ensure responsive behavior for draggable windows
+- Music player should work as standalone draggable pop-up
+- Gallery should support image grid with lightbox/modal
+- Reels page: embed or link to TikTok/Instagram Reels/YouTube Shorts
+
+================================================================================

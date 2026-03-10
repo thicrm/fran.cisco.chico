@@ -1,0 +1,136 @@
+/* Tailwind - temporarily disabled to debug
+@import "tailwindcss";
+*/
+
+/* GMB-inspired base styles - dark, minimal, editorial */
+:root {
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-text: #f5f5f5;
+  --color-text-muted: #a3a3a3;
+  --color-accent: #e5e5e5;
+  --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar but allow scroll */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+}
+
+#root {
+  min-height: 100vh;
+  display: block;
+}
+
+/* Windows 95 button style */
+.win95-btn {
+  font-family: MS Sans Serif, Tahoma, sans-serif;
+  border: 1px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  background: #c0c0c0;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 1px 1px 0 #000;
+}
+.win95-btn:hover {
+  border-color: #000 #fff #fff #000;
+}
+.win95-btn:active {
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+  box-shadow: none;
+  padding: 1px 0 0 1px;
+}
+
+/* Instagram embed - no border */
+.instagram-embed-no-border blockquote,
+.instagram-embed-no-border iframe {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Nav link hover colors */
+.nav-link.nav-hover-content:hover { color: #2563eb !important; }
+.nav-link.nav-hover-gallery:hover { color: #16a34a !important; }
+.nav-link.nav-hover-music:hover { color: #7c3aed !important; }
+.nav-link.nav-hover-shows:hover { color: #ea580c !important; }
+.nav-link.nav-hover-about:hover { color: #0d9488 !important; }
+.nav-link.nav-hover-contact:hover { color: #dc2626 !important; }
+
+/* About picture - scale up on hover */
+.about-picture {
+  transition: transform 0.3s ease, box-shadow 0.4s ease;
+}
+.about-picture:hover {
+  transform: scale(1.05);
+}
+
+/* Notepad title - @ color animation */
+@keyframes notepad-at-rainbow {
+  0% { color: #ff6b6b; }
+  14% { color: #ffd93d; }
+  28% { color: #6bcb77; }
+  42% { color: #4d96ff; }
+  57% { color: #9b59b6; }
+  71% { color: #e056fd; }
+  85% { color: #ff9f43; }
+  100% { color: #ff6b6b; }
+}
+.notepad-at-sign {
+  animation: notepad-at-rainbow 3s linear infinite;
+}
+
+/* About text - Win95 Notepad style */
+.about-text {
+  transition: transform 0.3s ease;
+}
+.about-text:hover {
+  transform: scale(1.02);
+}
+
+/* Win95 Notepad - visible scrollbar (override global hide) */
+.win95-notepad-content {
+  scrollbar-width: auto;
+  scrollbar-color: #c0c0c0 #ffffff;
+}
+.win95-notepad-content::-webkit-scrollbar {
+  display: block !important;
+  width: 16px;
+}
+.win95-notepad-content::-webkit-scrollbar-track {
+  background: #c0c0c0;
+  border: 1px solid #808080;
+}
+.win95-notepad-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c0c0c0 0%, #808080 100%);
+  border: 1px solid #dfdfdf #808080 #808080 #dfdfdf;
+  min-height: 24px;
+}
+.win95-notepad-content::-webkit-scrollbar-button {
+  display: block;
+  height: 16px;
+  background: #c0c0c0;
+  border: 1px solid #808080;
+}
