@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Video assets (large files)
+video_source.mov
+video_background_optimized.mp4

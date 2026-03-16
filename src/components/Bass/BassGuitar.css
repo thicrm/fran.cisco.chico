@@ -1,0 +1,402 @@
+/* ============================================================
+   BassGuitar.css — Retro dark wood & neon aesthetic
+   Scoped to avoid conflicts with global styles
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
+
+/* ── Root variables ─────────────────────────────────────────── */
+.bass-guitar {
+  --bg-deep:      rgba(100, 100, 100, 0.5);
+  --bg-dark:      rgba(80, 80, 80, 0.5);
+  --bg-surface:   rgba(120, 120, 120, 0.5);
+  --bg-fret:      rgba(100, 100, 100, 0.5);
+  --wood-dark:    rgba(100, 100, 100, 0.5);
+  --wood-mid:     rgba(120, 120, 120, 0.5);
+  --wood-light:   rgba(140, 140, 140, 0.5);
+  --gold:         #ffffff;
+  --gold-dim:     #e0e0e0;
+  --gold-bright:  #ffffff;
+  --neon:         #ffffff;
+  --neon-glow:    rgba(255, 255, 255, 0.4);
+  --string-1:     #ffffff;
+  --string-2:     #ffffff;
+  --string-3:     #ffffff;
+  --string-4:     #ffffff;
+  --fret-metal:   #aaa898;
+  --fret-shadow:  #555544;
+  --dot-color:    rgba(255, 255, 255, 0.25);
+  --radius:       0;
+  --font-display: 'Orbitron', monospace;
+  --font-mono:    'Share Tech Mono', monospace;
+}
+
+/* ── Container (transparent, no box) ─────────────────────────── */
+.bass-guitar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* ── Header (note display only) ─────────────────────────────── */
+.bass-guitar__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ── Note display ───────────────────────────────────────────── */
+.bass-guitar__note {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gold-bright);
+  min-width: 56px;
+  text-align: center;
+  letter-spacing: 0.05em;
+  transition: color 0.15s, text-shadow 0.15s;
+  line-height: 1;
+}
+
+.bass-guitar__note.playing {
+  color: #fff;
+  text-shadow:
+    0 0 8px var(--neon),
+    0 0 24px var(--neon-glow);
+}
+
+/* Black contour on note/tuner when page has white background */
+.bass-guitar--white-bg .bass-guitar__note {
+  -webkit-text-stroke: 1.5px #000;
+  paint-order: stroke fill;
+}
+
+.bass-guitar--white-bg .bass-guitar__note.playing {
+  -webkit-text-stroke: 1.5px #000;
+}
+
+/* ── Fretboard ──────────────────────────────────────────────── */
+.bass-guitar__fretboard-wrap {
+  width: 100%;
+}
+
+.bass-guitar__fretboard {
+  width: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  border: 2px solid var(--wood-dark);
+  background: var(--bg-fret);
+}
+
+.bass-guitar__string-row {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid rgba(100, 100, 100, 0.5);
+  position: relative;
+}
+
+.bass-guitar__string-row:last-child {
+  border-bottom: none;
+}
+
+/* Open string label button */
+.bass-guitar__open-btn {
+  width: 44px;
+  min-width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wood-dark);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+  border: none;
+  border-right: 2px solid var(--bg-fret);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s, color 0.1s;
+  outline: none;
+  letter-spacing: 0.05em;
+}
+
+.bass-guitar__open-btn:hover {
+  background: var(--wood-mid);
+  color: var(--gold-bright);
+}
+
+.bass-guitar__open-btn:active,
+.bass-guitar__open-btn.active {
+  background: var(--wood-light);
+  color: #fff;
+}
+
+/* String line overlay */
+.bass-guitar__string-line {
+  position: absolute;
+  left: 44px;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 1;
+  border-radius: 0;
+}
+
+/* Frets container */
+.bass-guitar__frets {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+/* Individual fret cell */
+.bass-guitar__fret {
+  flex: 1;
+  height: 100%;
+  border-right: 2.5px solid var(--fret-metal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.07s;
+  background: transparent;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bass-guitar__fret:first-child {
+  border-left: 4px solid #ccc;
+}
+
+.bass-guitar__fret:last-child {
+  border-right: 1px solid var(--fret-shadow);
+}
+
+/* Alternating fret shading */
+.bass-guitar__fret:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.bass-guitar__fret:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.bass-guitar__fret.active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.bass-guitar__fret.active::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  background: var(--gold-bright);
+  box-shadow: 0 0 8px var(--neon-glow);
+  pointer-events: none;
+  animation: fretPop 0.35s ease-out forwards;
+}
+
+@keyframes fretPop {
+  0%   { transform: scale(0.4); opacity: 1; }
+  60%  { transform: scale(1.1); opacity: 0.9; }
+  100% { transform: scale(1);   opacity: 0; }
+}
+
+/* Position marker dots */
+.bass-guitar__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 0;
+  background: var(--dot-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Double dot at fret 12 */
+.bass-guitar__fret[data-fret="12"] .bass-guitar__dot {
+  box-shadow: 0 -8px 0 var(--dot-color), 0 8px 0 var(--dot-color);
+  background: transparent;
+}
+
+/* ── Fret numbers ───────────────────────────────────────────── */
+.bass-guitar__fret-nums {
+  display: flex;
+  padding-left: 44px;
+  margin-top: 4px;
+}
+
+.bass-guitar__fret-num {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--gold-dim);
+  opacity: 0.5;
+  padding: 2px 0;
+}
+
+.bass-guitar__fret-num.marker {
+  opacity: 0.9;
+  color: var(--gold);
+}
+
+/* ── Controls (Win95 style) ──────────────────────────────────── */
+.bass-guitar__controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.bass-guitar__knob-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #c0c0c0;
+  border: 1px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  box-shadow: 1px 1px 0 #000;
+  border-radius: 0;
+  padding: 10px 14px 8px;
+  min-width: 80px;
+}
+
+.bass-guitar__knob-label {
+  font-family: MS Sans Serif, Tahoma, sans-serif;
+  font-size: 10px;
+  color: #000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.bass-guitar__knob-value {
+  font-family: MS Sans Serif, Tahoma, sans-serif;
+  font-size: 11px;
+  color: #000;
+  letter-spacing: 0.05em;
+}
+
+/* Range slider - Win95 sunken track + 3D thumb */
+.bass-guitar__controls input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 6px;
+  background: #c0c0c0;
+  border: 1px solid;
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+  border-radius: 0;
+  outline: none;
+  cursor: pointer;
+}
+
+.bass-guitar__controls input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  border: 1px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  background: #c0c0c0;
+  box-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+
+.bass-guitar__controls input[type='range']::-webkit-slider-thumb:hover {
+  border-color: #000 #fff #fff #000;
+}
+
+.bass-guitar__controls input[type='range']::-webkit-slider-thumb:active {
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+  box-shadow: none;
+}
+
+.bass-guitar__controls input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 0;
+  border: 1px solid;
+  border-color: #dfdfdf #808080 #808080 #dfdfdf;
+  background: #c0c0c0;
+  box-shadow: 1px 1px 0 #000;
+  cursor: pointer;
+}
+
+.bass-guitar__controls input[type='range']::-moz-range-thumb:hover {
+  border-color: #000 #fff #fff #000;
+}
+
+.bass-guitar__controls input[type='range']::-moz-range-thumb:active {
+  border-color: #808080 #dfdfdf #dfdfdf #808080;
+  box-shadow: none;
+}
+
+/* ── Keyboard hint ──────────────────────────────────────────── */
+.bass-guitar__kb-hint {
+  font-family: MS Sans Serif, Tahoma, sans-serif;
+  font-size: 10px;
+  color: #555;
+  text-align: center;
+  letter-spacing: 0.05em;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 500px) {
+  .bass-guitar {
+    padding: 20px 12px 16px;
+    gap: 14px;
+  }
+
+  .bass-guitar__string-row {
+    height: 40px;
+  }
+
+  .bass-guitar__open-btn {
+    width: 36px;
+    min-width: 36px;
+    font-size: 10px;
+  }
+
+  .bass-guitar__fret-nums {
+    padding-left: 36px;
+  }
+
+  .bass-guitar__note {
+    font-size: 24px;
+  }
+
+  .bass-guitar__controls {
+    gap: 8px;
+  }
+
+  .bass-guitar__knob-group {
+    padding: 8px 10px 6px;
+    min-width: 68px;
+  }
+
+  .bass-guitar__controls input[type='range'] {
+    width: 60px;
+  }
+}

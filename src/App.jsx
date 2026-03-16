@@ -2,6 +2,7 @@ import { useState } from 'react'
 import MusicPlayer from './components/MusicPlayer/MusicPlayer'
 import InstagramEmbed from './components/InstagramEmbed/InstagramEmbed'
 import Gallery from './components/Gallery/Gallery'
+import Bass from './components/Bass/Bass'
 
 const REELS = [
   { id: 'C2AmeFgLhDc', url: 'https://www.instagram.com/reel/C2AmeFgLhDc/', useBlockquote: true },
@@ -18,11 +19,6 @@ const NAV_ITEMS = [
   { id: 'contact', label: 'contact', hoverClass: 'nav-hover-contact' },
 ]
 
-const SPOTIFY_EMBEDS = [
-  { type: 'track', id: '42EMSKPgulAzr4RLY65Eut', title: 'Nobody - Mac DeMarco' },
-  { type: 'track', id: '1yg7fwwYmx9DQ2TdXUmfpJ', title: 'Holding Back the Years - Simply Red' },
-]
-
 // Contact links - update with your details
 const CONTACT_LINKS = {
   email: 'mailto:your@email.com',
@@ -30,6 +26,11 @@ const CONTACT_LINKS = {
   instagram: 'https://instagram.com/',
   tiktok: 'https://tiktok.com/@',
 }
+
+// Use mp4 for broad browser support. For faster loading, re-encode with: ffmpeg -i input.mov -c:v libx264 -movflags +faststart -preset fast -crf 26 -vf "scale=-2:720" output.mp4
+// (+faststart = progressive playback, 720p = smaller file for background)
+const VIDEO_BACKGROUND_MP4 = 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/Screen%20Recording%202026-03-16%20at%2014.15.39.mp4'
+const VIDEO_BACKGROUND_MOV = 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/Screen%20Recording%202026-03-16%20at%2014.15.39.mov'
 
 // Strong backgrounds (gradient like music player) + pastel text
 const PAGE_COLORS = [
@@ -56,10 +57,20 @@ function hexToRgba(hex, alpha) {
 
 export default function App() {
   const [showMusicPlayer, setShowMusicPlayer] = useState(true)
-  const [pageColor, setPageColor] = useState({ bg: '#ffffff', text: '#000000', swatch: '#ffffff' })
+  const [pageColor, setPageColor] = useState({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
+  const [useVideoBackground, setUseVideoBackground] = useState(true)
+  const [videoReady, setVideoReady] = useState(false)
 
   const handleColorSelect = (color) => {
+    setUseVideoBackground(false)
+    setVideoReady(false)
     setPageColor({ bg: color.bg, text: color.text, swatch: color.swatch })
+  }
+
+  const handleVideoBackgroundSelect = () => {
+    setUseVideoBackground(true)
+    setVideoReady(false)
+    setPageColor({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
   }
 
   return (
@@ -103,35 +114,80 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Color palette - always visible on right edge */}
+      {/* Color palette - Win95 style, always visible on right edge */}
       <div
         style={{
           position: 'fixed',
           right: 0,
           top: '50%',
           transform: 'translateY(-50%)',
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 28px)',
-          gridTemplateRows: 'repeat(3, 28px)',
           zIndex: 200,
+          border: '2px solid',
+          borderColor: '#dfdfdf #808080 #808080 #dfdfdf',
+          boxShadow: '1px 1px 0 #000',
+          backgroundColor: '#c0c0c0',
+          padding: '4px',
         }}
       >
-        {PAGE_COLORS.map((color) => (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 28px)',
+            gridTemplateRows: 'repeat(3, 28px)',
+            gap: '2px',
+          }}
+        >
+          {PAGE_COLORS.map((color) => (
+            <button
+              key={color.name}
+              onClick={() => handleColorSelect(color)}
+              title={color.name}
+              style={{
+                width: '28px',
+                height: '28px',
+                padding: 0,
+                margin: 0,
+                backgroundColor: color.swatch,
+                border: '2px solid',
+                borderColor: '#dfdfdf #808080 #808080 #dfdfdf',
+                boxShadow: '1px 1px 0 #000',
+                cursor: 'pointer',
+              }}
+            />
+          ))}
           <button
-            key={color.name}
-            onClick={() => handleColorSelect(color)}
-            title={color.name}
+            onClick={handleVideoBackgroundSelect}
+            title="Video background"
             style={{
+              position: 'relative',
               width: '28px',
               height: '28px',
               padding: 0,
               margin: 0,
-              backgroundColor: color.swatch,
-              border: color.swatch === '#ffffff' ? '1px solid #ddd' : 'none',
+              background: 'linear-gradient(135deg, #1e3a5f 0%, #4a1942 50%, #2d1b4e 100%)',
+              border: '2px solid',
+              borderColor: useVideoBackground ? '#000 #fff #fff #000' : '#dfdfdf #808080 #808080 #dfdfdf',
+              boxShadow: useVideoBackground ? 'none' : '1px 1px 0 #000',
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
             }}
-          />
-        ))}
+          >
+            <video
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="metadata"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            >
+              <source src={VIDEO_BACKGROUND_MP4} type="video/mp4" />
+              <source src={VIDEO_BACKGROUND_MOV} type="video/mp4" />
+            </video>
+          </button>
+        </div>
       </div>
 
       {/* Music player - floating, sized to content so doesn't block page */}
@@ -143,13 +199,43 @@ export default function App() {
 
       <main
         style={{
+          position: 'relative',
           padding: '40px 100px 40px 40px',
-          background: pageColor.bg,
+          background: useVideoBackground
+            ? (videoReady ? 'transparent' : 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)')
+            : pageColor.bg,
           color: pageColor.text,
           minHeight: 'calc(100vh - 57px)',
           transition: 'background 0.4s ease, color 0.3s ease',
+          overflow: 'hidden',
         }}
       >
+        {useVideoBackground && (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            fetchPriority="high"
+            onCanPlay={() => setVideoReady(true)}
+            onLoadStart={() => setVideoReady(false)}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              zIndex: 0,
+              opacity: videoReady ? 1 : 0,
+              transition: 'opacity 0.5s ease',
+            }}
+          >
+            <source src={VIDEO_BACKGROUND_MP4} type="video/mp4" />
+            <source src={VIDEO_BACKGROUND_MOV} type="video/mp4" />
+          </video>
+        )}
+        <div style={{ position: 'relative', zIndex: 1 }}>
         <header style={{ marginBottom: '64px' }}>
           <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 400, color: 'inherit', fontFamily: 'system-ui, sans-serif' }}>
             <span className="notepad-at-sign">@</span>fran.cisco.chico
@@ -159,26 +245,22 @@ export default function App() {
           </p>
         </header>
 
-        <section id="music" style={{ marginTop: '64px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>Music</h2>
-          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-            {SPOTIFY_EMBEDS.map((embed) => (
-              <iframe
-                key={`${embed.type}-${embed.id}`}
-                src={`https://open.spotify.com/embed/${embed.type}/${embed.id}`}
-                title={embed.title}
-                width="100%"
-                height="352"
-                style={{
-                  maxWidth: '400px',
-                  border: 'none',
-                  borderRadius: '12px',
-                }}
-                allowFullScreen
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                loading="lazy"
-              />
-            ))}
+        <section id="music" style={{ marginTop: '64px', marginBottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px', alignSelf: 'stretch' }}>Music</h2>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '700px',
+              minHeight: '320px',
+              isolation: 'isolate',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '0 auto',
+              alignSelf: 'center',
+            }}
+          >
+            <Bass isWhiteBackground={pageColor.swatch === '#ffffff'} />
           </div>
           {!showMusicPlayer && (
             <button
@@ -445,6 +527,7 @@ export default function App() {
         >
           © {new Date().getFullYear()} fran.cisco.chico
         </footer>
+        </div>
       </main>
     </div>
   )
