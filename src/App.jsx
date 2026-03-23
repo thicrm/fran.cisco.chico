@@ -1,14 +1,9 @@
 import { useState } from 'react'
 import MusicPlayer from './components/MusicPlayer/MusicPlayer'
-import InstagramEmbed from './components/InstagramEmbed/InstagramEmbed'
+import ContentReels from './components/ContentReels/ContentReels'
+import ShowPictures from './components/ShowPictures/ShowPictures'
 import Gallery from './components/Gallery/Gallery'
 import Bass from './components/Bass/Bass'
-
-const REELS = [
-  { id: 'C2AmeFgLhDc', url: 'https://www.instagram.com/reel/C2AmeFgLhDc/', useBlockquote: true },
-  { id: 'DVeoKZ6Dmou', url: 'https://www.instagram.com/reel/DVeoKZ6Dmou/', useBlockquote: true },
-  { id: 'DH3WP6OuE2u', url: 'https://www.instagram.com/reel/DH3WP6OuE2u/', useBlockquote: true },
-]
 
 const NAV_ITEMS = [
   { id: 'music', label: 'music', hoverClass: 'nav-hover-music' },
@@ -31,6 +26,10 @@ const CONTACT_LINKS = {
 // (+faststart = progressive playback, 720p = smaller file for background)
 const VIDEO_BACKGROUND_MP4 = 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/Screen%20Recording%202026-03-16%20at%2014.15.39.mp4'
 const VIDEO_BACKGROUND_MOV = 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/Screen%20Recording%202026-03-16%20at%2014.15.39.mov'
+
+/** Fran Nogueira — RECS (playlist 3ukURI59vkk4vXHjHpebJi) */
+const SPOTIFY_PLAYLIST_EMBED_SRC =
+  'https://open.spotify.com/embed/playlist/3ukURI59vkk4vXHjHpebJi?utm_source=generator'
 
 // Strong backgrounds (gradient like music player) + pastel text
 const PAGE_COLORS = [
@@ -74,7 +73,7 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
+    <div style={{ minHeight: '100vh', fontFamily: '"Montserrat", sans-serif' }}>
       <nav
         style={{
           position: 'sticky',
@@ -107,6 +106,8 @@ export default function App() {
               cursor: 'pointer',
               textTransform: 'lowercase',
               transition: 'color 0.2s ease',
+              fontWeight: 300,
+              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             {item.label}
@@ -237,16 +238,74 @@ export default function App() {
         )}
         <div style={{ position: 'relative', zIndex: 1 }}>
         <header style={{ marginBottom: '64px' }}>
-          <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 400, color: 'inherit', fontFamily: 'system-ui, sans-serif' }}>
-            <span className="notepad-at-sign">@</span>fran.cisco.chico
+          <h1
+            style={{
+              fontSize: '32px',
+              margin: 0,
+              fontWeight: 800,
+              color: 'inherit',
+              fontFamily: '"Rubik", sans-serif',
+            }}
+          >
+            <span className="notepad-at-sign">@</span>Francisco Chico
           </h1>
-          <p style={{ marginTop: '16px', color: 'inherit', opacity: 0.85, fontFamily: 'system-ui, sans-serif', fontWeight: 300, textTransform: 'lowercase' }}>
+          <p
+            style={{
+              marginTop: '16px',
+              color: 'inherit',
+              opacity: 0.85,
+              fontFamily: '"Montserrat", sans-serif',
+              fontWeight: 300,
+              textTransform: 'lowercase',
+            }}
+          >
             Musician • Bassist • Guitarist • Drummer • Producer
           </p>
         </header>
 
-        <section id="music" style={{ marginTop: '64px', marginBottom: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px', alignSelf: 'stretch' }}>Music</h2>
+        <section
+          id="music"
+          style={{
+            marginTop: '64px',
+            marginBottom: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',
+            zIndex: 3,
+          }}
+        >
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              alignSelf: 'stretch',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Music
+          </h2>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '700px',
+              marginBottom: '32px',
+              alignSelf: 'center',
+            }}
+          >
+            <iframe
+              title="Fran Nogueira — RECS no Spotify"
+              src={SPOTIFY_PLAYLIST_EMBED_SRC}
+              width="100%"
+              height={352}
+              style={{ border: 'none', borderRadius: '12px', display: 'block', minHeight: '352px' }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            />
+          </div>
           <div
             style={{
               width: '100%',
@@ -264,15 +323,13 @@ export default function App() {
           </div>
           {!showMusicPlayer && (
             <button
+              type="button"
+              className="win95-btn"
               onClick={() => setShowMusicPlayer(true)}
               style={{
                 marginTop: '24px',
                 padding: '8px 16px',
-                fontSize: '12px',
-                backgroundColor: 'rgba(0,0,0,0.08)',
-                border: '1px solid rgba(0,0,0,0.15)',
-                color: 'inherit',
-                cursor: 'pointer',
+                fontSize: '11px',
               }}
             >
               Open Music Player
@@ -280,57 +337,78 @@ export default function App() {
           )}
         </section>
 
-        <section id="content" style={{ marginTop: '80px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>Content</h2>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            {REELS.map((reel) =>
-              reel.useBlockquote ? (
-                <InstagramEmbed key={reel.id} reelId={reel.id} />
-              ) : (
-                <a
-                  key={reel.id}
-                  href={reel.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    width: 'min(280px, 100%)',
-                    display: 'block',
-                    textDecoration: 'none',
-                    color: 'inherit',
-                  }}
-                >
-                  <iframe
-                    src={`https://www.instagram.com/reel/${reel.id}/embed?hidecaption=1`}
-                    title={`Reel ${reel.id}`}
-                    scrolling="no"
-                    style={{
-                      width: '100%',
-                      aspectRatio: '9/16',
-                      border: 'none',
-                      display: 'block',
-                    }}
-                  />
-                </a>
-              )
-            )}
+        <section
+          id="content"
+          style={{
+            marginTop: '80px',
+            position: 'relative',
+            zIndex: 5,
+            isolation: 'isolate',
+            paddingBottom: 'clamp(48px, 10vw, 120px)',
+            scrollMarginTop: '72px',
+          }}
+        >
+          <h2
+            className="content-section-heading section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Content
+          </h2>
+          <div className="content-section-body">
+            <ContentReels />
           </div>
         </section>
 
-        <section id="gallery" style={{ marginTop: '80px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>Gallery</h2>
+        <section id="gallery" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Gallery
+          </h2>
           <Gallery />
         </section>
 
-        <section id="shows" style={{ marginTop: '80px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>Shows</h2>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
-            <InstagramEmbed permalink="https://www.instagram.com/p/DDDT4gXyN83/?utm_source=ig_embed&amp;utm_campaign=loading" />
-            <InstagramEmbed permalink="https://www.instagram.com/p/C_eOUUNvgSM/?utm_source=ig_embed&amp;utm_campaign=loading" />
-          </div>
+        <section id="shows" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Shows
+          </h2>
+          <ShowPictures />
         </section>
 
-        <section id="about" style={{ marginTop: '80px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>About me</h2>
+        <section id="about" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            About me
+          </h2>
           <div style={{ display: 'flex', gap: '40px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div
               className="about-picture"
@@ -376,7 +454,7 @@ export default function App() {
                     fontFamily: 'MS Sans Serif, Tahoma, sans-serif',
                   }}
                 >
-                  <span className="notepad-at-sign">@</span>fran.cisco.chico
+                  Francisco Chico
                 </div>
                 {/* Menu bar */}
                 <div
@@ -407,7 +485,7 @@ export default function App() {
                   }}
                 >
                   <p style={{ margin: 0, marginBottom: '0.8em' }}>
-                    fran.cisco.chico is a musician, bassist, guitarist, drummer, producer, and content creator based in [location].
+                    Francisco Chico is a musician, bassist, guitarist, drummer, producer, and content creator based in [location].
                   </p>
                   <p style={{ margin: 0, marginBottom: '0.8em' }}>
                     With a passion for crafting sounds across multiple instruments and production styles, the focus is on collaboration and bringing creative visions to life—whether in the studio, on stage, or through digital content.
@@ -424,8 +502,19 @@ export default function App() {
           </div>
         </section>
 
-        <section id="contact" style={{ marginTop: '80px', paddingBottom: '80px' }}>
-          <h2 style={{ fontSize: '11px', letterSpacing: '0.2em', opacity: 0.7, textTransform: 'uppercase', marginBottom: '24px' }}>Contact</h2>
+        <section id="contact" style={{ marginTop: '80px', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              fontFamily: '"Montserrat", sans-serif',
+            }}
+          >
+            Contact
+          </h2>
           <div
             style={{
               display: 'flex',
@@ -511,7 +600,6 @@ export default function App() {
             textAlign: 'center',
             fontFamily: '"Comic Sans MS", "Comic Sans", cursive',
             fontWeight: 600,
-            textTransform: 'lowercase',
             fontSize: '14px',
             textShadow: `
               -1px -1px 0 #000,
@@ -525,7 +613,7 @@ export default function App() {
             `,
           }}
         >
-          © {new Date().getFullYear()} fran.cisco.chico
+          © {new Date().getFullYear()} Francisco Chico
         </footer>
         </div>
       </main>

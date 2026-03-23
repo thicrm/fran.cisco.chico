@@ -10,7 +10,7 @@
   --color-text-muted: #a3a3a3;
   --color-accent: #e5e5e5;
   --font-display: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --font-body: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: "Montserrat", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -23,7 +23,7 @@ body {
   min-height: 100vh;
   background-color: #ffffff;
   color: #000000;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -64,11 +64,83 @@ body::-webkit-scrollbar,
   padding: 1px 0 0 1px;
 }
 
-/* Instagram embed - no border */
+/* Main section titles — weight +100 vs old 300; glow must not use element opacity (fades shadow too) */
+.section-heading {
+  font-weight: 400;
+  /* Muted label via color mix — keeps text-shadow at full strength (unlike opacity: 0.7 on the element) */
+  color: color-mix(in srgb, currentColor 78%, transparent);
+  text-shadow:
+    0 0 2px rgba(0, 0, 0, 0.75),
+    0 0 10px rgba(255, 255, 255, 0.55),
+    0 0 22px rgba(255, 255, 255, 0.38),
+    0 0 40px rgba(255, 255, 255, 0.2);
+}
+
+/* Content section — title always above reels (explicit grid rows; avoids flex/order quirks) */
+#content {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: start;
+  justify-items: stretch;
+}
+
+#content .content-section-heading {
+  grid-row: 1;
+  grid-column: 1;
+  margin: 0 0 24px 0;
+  position: relative;
+  z-index: 2;
+}
+
+#content .content-section-body {
+  grid-row: 2;
+  grid-column: 1;
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  display: flow-root;
+}
+
+/* Instagram embed - no border; collapse stray line-box gap under iframe */
+.instagram-embed-no-border {
+  line-height: 0;
+  display: block;
+}
+
 .instagram-embed-no-border blockquote,
 .instagram-embed-no-border iframe {
   border: none !important;
   box-shadow: none !important;
+  display: block !important;
+  margin: 0 !important;
+}
+
+/* Content reels — minimal side arrows */
+.content-reel-arrow {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 32px;
+  line-height: 1;
+  padding: 4px 12px;
+  opacity: 0.45;
+  font-weight: 200;
+  font-family: var(--font-body);
+  transition: opacity 0.2s ease;
+}
+.content-reel-arrow:hover {
+  opacity: 0.9;
+}
+.content-reel-arrow:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}
+.content-reel-arrow:disabled {
+  opacity: 0.2;
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Nav link hover colors */

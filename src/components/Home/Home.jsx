@@ -10,6 +10,7 @@ export default function Home() {
           style={{
             fontSize: '1.5rem',
             fontWeight: 300,
+            fontFamily: '"Montserrat", sans-serif',
             color: '#ffffff',
             margin: 0,
           }}
@@ -20,6 +21,7 @@ export default function Home() {
           style={{
             fontSize: '1.5rem',
             fontWeight: 300,
+            fontFamily: '"Montserrat", sans-serif',
             color: '#ffffff',
             margin: 0,
           }}
@@ -30,6 +32,8 @@ export default function Home() {
       <p
         style={{
           fontSize: '14px',
+          fontFamily: '"Montserrat", sans-serif',
+          fontWeight: 300,
           color: 'rgba(255, 255, 255, 0.8)',
           marginBottom: '24px',
           maxWidth: '400px',
@@ -40,6 +44,8 @@ export default function Home() {
       <p
         style={{
           fontSize: '11px',
+          fontFamily: '"Montserrat", sans-serif',
+          fontWeight: 300,
           color: 'rgba(255, 255, 255, 0.6)',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
