@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import MusicPlayer from './components/MusicPlayer/MusicPlayer'
 import ContentReels from './components/ContentReels/ContentReels'
 import ShowPictures from './components/ShowPictures/ShowPictures'
@@ -54,7 +54,23 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
+const CURSOR_STORAGE_KEY = 'fran-cursor-pick'
+/** Same-origin assets in /public/cursors — avoids CORS tainting canvas & cross-origin cursor limits */
+const CURSOR_PICK_THIN = '/cursors/palheta_thin.png'
+const CURSOR_PICK_HEAVY = '/cursors/palheta_heavy.png'
+
+function readStoredCursorPick() {
+  try {
+    const v = localStorage.getItem(CURSOR_STORAGE_KEY)
+    if (v === 'thin' || v === 'heavy' || v === 'default') return v
+  } catch {
+    /* ignore */
+  }
+  return 'default'
+}
+
 export default function App() {
+  const [cursorPick, setCursorPick] = useState(readStoredCursorPick)
   const [showMusicPlayer, setShowMusicPlayer] = useState(true)
   const [pageColor, setPageColor] = useState({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
   const [useVideoBackground, setUseVideoBackground] = useState(true)
@@ -71,6 +87,83 @@ export default function App() {
     setVideoReady(false)
     setPageColor({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
   }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CURSOR_STORAGE_KEY, cursorPick)
+    } catch {
+      /* ignore */
+    }
+    const root = document.documentElement
+    const body = document.body
+    let cancelled = false
+
+    const clearCursors = () => {
+      root.style.cursor = ''
+      body.style.cursor = ''
+    }
+
+    const applyCursor = (value) => {
+      root.style.cursor = value
+      body.style.cursor = value
+    }
+
+    if (cursorPick === 'default') {
+      root.classList.remove('cursor-pick-active')
+      clearCursors()
+      return () => {
+        cancelled = true
+      }
+    }
+
+    root.classList.add('cursor-pick-active')
+
+    const src = cursorPick === 'thin' ? CURSOR_PICK_THIN : CURSOR_PICK_HEAVY
+    const img = new Image()
+    /* same-origin /public — no crossOrigin needed; avoids tainted canvas */
+    img.onload = () => {
+      if (cancelled) return
+      const max = 128
+      const w = img.naturalWidth
+      const h = img.naturalHeight
+      if (!w || !h) {
+        applyCursor(`url("${src}") 16 24, auto`)
+        return
+      }
+      const scale = Math.min(1, max / Math.max(w, h))
+      const sw = Math.max(1, Math.floor(w * scale))
+      const sh = Math.max(1, Math.floor(h * scale))
+      const canvas = document.createElement('canvas')
+      canvas.width = sw
+      canvas.height = sh
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        applyCursor(`url("${src}") ${Math.round(sw / 2)} ${Math.min(sh - 1, Math.round(sh * 0.93))}, auto`)
+        return
+      }
+      ctx.drawImage(img, 0, 0, sw, sh)
+      let dataUrl
+      try {
+        dataUrl = canvas.toDataURL('image/png')
+      } catch {
+        applyCursor(`url("${src}") ${Math.round(sw / 2)} ${Math.min(sh - 1, Math.round(sh * 0.93))}, auto`)
+        return
+      }
+      const hx = Math.round(sw / 2)
+      const hy = Math.min(sh - 1, Math.round(sh * 0.93))
+      applyCursor(`url("${dataUrl}") ${hx} ${hy}, auto`)
+    }
+    img.onerror = () => {
+      if (!cancelled) applyCursor('auto')
+    }
+    img.src = src
+
+    return () => {
+      cancelled = true
+      root.classList.remove('cursor-pick-active')
+      clearCursors()
+    }
+  }, [cursorPick])
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: '"Montserrat", sans-serif' }}>
@@ -114,6 +207,37 @@ export default function App() {
           </button>
         ))}
       </nav>
+
+      {/* Guitar pick cursor — top right: two PNGs only */}
+      <div
+        className="cursor-pick-wrap"
+        role="group"
+        aria-label="Mouse cursor style"
+        style={{
+          position: 'fixed',
+          top: '72px',
+          right: '16px',
+          zIndex: 199,
+          maxWidth: 'min(200px, calc(100vw - 120px))',
+        }}
+      >
+        {[
+          { id: 'thin', label: 'Thin pick cursor' },
+          { id: 'heavy', label: 'Heavy pick cursor' },
+        ].map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            title={opt.label}
+            aria-pressed={cursorPick === opt.id}
+            aria-label={opt.label}
+            onClick={() => setCursorPick(opt.id)}
+            className={`cursor-pick-choice ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
+          >
+            <img src={opt.id === 'thin' ? CURSOR_PICK_THIN : CURSOR_PICK_HEAVY} alt="" draggable={false} />
+          </button>
+        ))}
+      </div>
 
       {/* Color palette - Win95 style, always visible on right edge */}
       <div
@@ -201,7 +325,9 @@ export default function App() {
       <main
         style={{
           position: 'relative',
-          padding: '40px 100px 40px 40px',
+          /* TRBL — responsive; right edge reserves space for fixed color palette on small/large viewports */
+          padding:
+            'clamp(20px, 5vw, 40px) clamp(56px, min(100px, 14vw), 120px) clamp(20px, 5vw, 40px) clamp(20px, 4vw, 40px)',
           background: useVideoBackground
             ? (videoReady ? 'transparent' : 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)')
             : pageColor.bg,
@@ -242,9 +368,10 @@ export default function App() {
             style={{
               fontSize: '32px',
               margin: 0,
-              fontWeight: 800,
+              fontWeight: 700,
               color: 'inherit',
-              fontFamily: '"Rubik", sans-serif',
+              fontFamily: '"Anton", sans-serif',
+              letterSpacing: '0.02em',
             }}
           >
             <span className="notepad-at-sign">@</span>Francisco Chico
@@ -283,7 +410,6 @@ export default function App() {
               textTransform: 'uppercase',
               marginBottom: '24px',
               alignSelf: 'stretch',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             Music
@@ -354,7 +480,6 @@ export default function App() {
               fontSize: '11px',
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             Content
@@ -372,7 +497,6 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             Gallery
@@ -388,7 +512,6 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             Shows
@@ -404,7 +527,6 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             About me
@@ -510,7 +632,6 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
-              fontFamily: '"Montserrat", sans-serif',
             }}
           >
             Contact

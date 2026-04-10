@@ -54,6 +54,8 @@ export default function ContentReels() {
         justifyContent: 'center',
         gap: '4px',
         width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
       }}
     >
       <button type="button" className="content-reel-arrow" aria-label="Reel anterior" onClick={goPrev} disabled={busy} aria-busy={busy}>
@@ -61,9 +63,8 @@ export default function ContentReels() {
       </button>
       <div
         style={{
-          flex: '0 1 auto',
-          minWidth: 0,
-          maxWidth: 'min(326px, calc(100% - 88px))',
+          flex: '0 0 auto',
+          width: 'min(326px, calc(100% - 88px))',
           minHeight: 'min(580px, 78vh)',
           position: 'relative',
           display: 'flex',

@@ -43,6 +43,65 @@ body::-webkit-scrollbar,
 #root {
   min-height: 100vh;
   display: block;
+  /* Ensure custom cursor from body/html isn’t reset to I-beam on text */
+  cursor: inherit;
+}
+
+/*
+ * Guitar-pick cursor: interactive elements often set cursor:pointer inline.
+ * !important beats those so the pick stays visible (inherit walks up to html’s url()).
+ */
+html.cursor-pick-active body,
+html.cursor-pick-active body * {
+  cursor: inherit !important;
+}
+
+/* Draggable music player title bar — keep “move” affordance */
+html.cursor-pick-active .win95-title-bar {
+  cursor: move !important;
+}
+
+/* Cursor picker — two PNGs; glow only on image (no box around control) */
+.cursor-pick-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.cursor-pick-choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.32s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.cursor-pick-choice:hover {
+  transform: scale(1.14);
+}
+
+.cursor-pick-choice img {
+  display: block;
+  width: 60px;
+  height: auto;
+  max-height: 72px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.28s ease;
+}
+
+.cursor-pick-choice--selected img {
+  filter:
+    drop-shadow(0 0 4px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.65))
+    drop-shadow(0 0 22px rgba(186, 104, 255, 0.55))
+    drop-shadow(0 0 34px rgba(96, 165, 250, 0.4));
 }
 
 /* Windows 95 button style */
@@ -64,9 +123,10 @@ body::-webkit-scrollbar,
   padding: 1px 0 0 1px;
 }
 
-/* Main section titles — weight +100 vs old 300; glow must not use element opacity (fades shadow too) */
+/* Main section titles — Anton (same as hero); glow must not use element opacity (fades shadow too) */
 .section-heading {
-  font-weight: 400;
+  font-family: "Anton", sans-serif;
+  font-weight: 700;
   /* Muted label via color mix — keeps text-shadow at full strength (unlike opacity: 0.7 on the element) */
   color: color-mix(in srgb, currentColor 78%, transparent);
   text-shadow:
@@ -79,10 +139,14 @@ body::-webkit-scrollbar,
 /* Content section — title always above reels (explicit grid rows; avoids flex/order quirks) */
 #content {
   display: grid !important;
-  grid-template-columns: minmax(0, 1fr);
+  /* minmax(0,1fr) let the track shrink to 0 and squished the phone/embed on narrow viewports */
+  grid-template-columns: 1fr;
   grid-template-rows: auto auto;
   align-content: start;
   justify-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 #content .content-section-heading {
@@ -98,8 +162,10 @@ body::-webkit-scrollbar,
   grid-column: 1;
   position: relative;
   z-index: 1;
-  min-width: 0;
   display: flow-root;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Instagram embed - no border; collapse stray line-box gap under iframe */
