@@ -504,7 +504,17 @@ export default function App() {
           <Gallery />
         </section>
 
-        <section id="shows" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+        <section
+          id="shows"
+          style={{
+            marginTop: '80px',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
           <h2
             className="section-heading"
             style={{
@@ -512,6 +522,8 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
+              width: '100%',
+              textAlign: 'center',
             }}
           >
             Shows
@@ -519,7 +531,17 @@ export default function App() {
           <ShowPictures />
         </section>
 
-        <section id="about" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+        <section
+          id="about"
+          style={{
+            marginTop: '80px',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
           <h2
             className="section-heading"
             style={{
@@ -527,11 +549,22 @@ export default function App() {
               letterSpacing: '0.2em',
               textTransform: 'uppercase',
               marginBottom: '24px',
+              width: '100%',
+              textAlign: 'center',
             }}
           >
             About me
           </h2>
-          <div style={{ display: 'flex', gap: '40px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '40px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
             <div
               className="about-picture"
               style={{
@@ -551,7 +584,7 @@ export default function App() {
             <div
               className="about-text win95-notepad"
               style={{
-                flex: '1',
+                flex: '0 1 auto',
                 minWidth: '280px',
                 maxWidth: 'min(400px, calc(100% - 100px))',
                 flexShrink: 0,

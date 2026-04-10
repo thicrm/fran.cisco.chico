@@ -88,6 +88,8 @@ export default function ShowPictures() {
         gap: '40px',
         alignItems: 'center',
         flexWrap: 'wrap',
+        justifyContent: 'center',
+        width: '100%',
       }}
     >
       {/* Picture visualizer */}
@@ -157,7 +159,7 @@ export default function ShowPictures() {
       {/* Win95 calendar — sizing like about notepad */}
       <div
         style={{
-          flex: '1',
+          flex: '0 1 auto',
           minWidth: '280px',
           maxWidth: 'min(400px, calc(100% - 100px))',
           flexShrink: 0,
