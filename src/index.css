@@ -48,8 +48,8 @@ body::-webkit-scrollbar,
 }
 
 /*
- * Guitar-pick cursor: interactive elements often set cursor:pointer inline.
- * !important beats those so the pick stays visible (inherit walks up to html’s url()).
+ * Custom image cursors: interactive elements often set cursor:pointer inline.
+ * !important beats those so the chosen cursor stays visible (inherit walks up to html’s url()).
  */
 html.cursor-pick-active body,
 html.cursor-pick-active body * {
@@ -61,12 +61,12 @@ html.cursor-pick-active .win95-title-bar {
   cursor: move !important;
 }
 
-/* Cursor picker — two PNGs; glow only on image (no box around control) */
+/* Cursor picker — Win95 arrow + pick PNGs; glow on selected image (compact, ~50% scale) */
 .cursor-pick-wrap {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
 }
 
 .cursor-pick-choice {
@@ -87,21 +87,28 @@ html.cursor-pick-active .win95-title-bar {
 
 .cursor-pick-choice img {
   display: block;
-  width: 60px;
+  width: 30px;
   height: auto;
-  max-height: 72px;
+  max-height: 36px;
   object-fit: contain;
   pointer-events: none;
   user-select: none;
   transition: filter 0.28s ease;
 }
 
+.cursor-pick-choice--win95 img {
+  width: 21px;
+  max-height: 24px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 .cursor-pick-choice--selected img {
   filter:
-    drop-shadow(0 0 4px rgba(255, 255, 255, 0.95))
-    drop-shadow(0 0 12px rgba(255, 255, 255, 0.65))
-    drop-shadow(0 0 22px rgba(186, 104, 255, 0.55))
-    drop-shadow(0 0 34px rgba(96, 165, 250, 0.4));
+    drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.65))
+    drop-shadow(0 0 11px rgba(186, 104, 255, 0.55))
+    drop-shadow(0 0 17px rgba(96, 165, 250, 0.4));
 }
 
 /* Windows 95 button style */
@@ -123,17 +130,11 @@ html.cursor-pick-active .win95-title-bar {
   padding: 1px 0 0 1px;
 }
 
-/* Main section titles — Anton (same as hero); glow must not use element opacity (fades shadow too) */
+/* Main section titles — Anton (same as hero); full strength text color */
 .section-heading {
   font-family: "Anton", sans-serif;
   font-weight: 700;
-  /* Muted label via color mix — keeps text-shadow at full strength (unlike opacity: 0.7 on the element) */
-  color: color-mix(in srgb, currentColor 78%, transparent);
-  text-shadow:
-    0 0 2px rgba(0, 0, 0, 0.75),
-    0 0 10px rgba(255, 255, 255, 0.55),
-    0 0 22px rgba(255, 255, 255, 0.38),
-    0 0 40px rgba(255, 255, 255, 0.2);
+  color: currentColor;
 }
 
 /* Content section — title always above reels (explicit grid rows; avoids flex/order quirks) */

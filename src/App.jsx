@@ -6,11 +6,11 @@ import Gallery from './components/Gallery/Gallery'
 import Bass from './components/Bass/Bass'
 
 const NAV_ITEMS = [
-  { id: 'music', label: 'music', hoverClass: 'nav-hover-music' },
-  { id: 'content', label: 'content', hoverClass: 'nav-hover-content' },
-  { id: 'gallery', label: 'gallery', hoverClass: 'nav-hover-gallery' },
-  { id: 'shows', label: 'shows', hoverClass: 'nav-hover-shows' },
   { id: 'about', label: 'about me', hoverClass: 'nav-hover-about' },
+  { id: 'music', label: 'music', hoverClass: 'nav-hover-music' },
+  { id: 'gallery', label: 'gallery', hoverClass: 'nav-hover-gallery' },
+  { id: 'content', label: 'content', hoverClass: 'nav-hover-content' },
+  { id: 'shows', label: 'shows', hoverClass: 'nav-hover-shows' },
   { id: 'contact', label: 'contact', hoverClass: 'nav-hover-contact' },
 ]
 
@@ -58,15 +58,26 @@ const CURSOR_STORAGE_KEY = 'fran-cursor-pick'
 /** Same-origin assets in /public/cursors — avoids CORS tainting canvas & cross-origin cursor limits */
 const CURSOR_PICK_THIN = '/cursors/palheta_thin.png'
 const CURSOR_PICK_HEAVY = '/cursors/palheta_heavy.png'
+const CURSOR_WIN95 = '/cursors/win95_arrow.png'
+
+/** Picker + effect: Win95 arrow (default), guitar picks */
+const CURSOR_OPTIONS = [
+  { id: 'win95', label: 'Windows 95 arrow cursor', src: CURSOR_WIN95 },
+  { id: 'thin', label: 'Thin pick cursor', src: CURSOR_PICK_THIN },
+  { id: 'heavy', label: 'Heavy pick cursor', src: CURSOR_PICK_HEAVY },
+]
+
+/** Hotspot in source image pixels (tip of arrow); picks use bottom-center heuristic instead */
+const CURSOR_HOTSPOT_PIXELS = { win95: [1, 2] }
 
 function readStoredCursorPick() {
   try {
     const v = localStorage.getItem(CURSOR_STORAGE_KEY)
-    if (v === 'thin' || v === 'heavy' || v === 'default') return v
+    if (v === 'win95' || v === 'thin' || v === 'heavy' || v === 'default') return v
   } catch {
     /* ignore */
   }
-  return 'default'
+  return 'win95'
 }
 
 export default function App() {
@@ -118,7 +129,10 @@ export default function App() {
 
     root.classList.add('cursor-pick-active')
 
-    const src = cursorPick === 'thin' ? CURSOR_PICK_THIN : CURSOR_PICK_HEAVY
+    const opt = CURSOR_OPTIONS.find((o) => o.id === cursorPick)
+    const src = opt?.src ?? CURSOR_WIN95
+    const fixedHotspot = CURSOR_HOTSPOT_PIXELS[cursorPick]
+
     const img = new Image()
     /* same-origin /public — no crossOrigin needed; avoids tainted canvas */
     img.onload = () => {
@@ -138,7 +152,13 @@ export default function App() {
       canvas.height = sh
       const ctx = canvas.getContext('2d')
       if (!ctx) {
-        applyCursor(`url("${src}") ${Math.round(sw / 2)} ${Math.min(sh - 1, Math.round(sh * 0.93))}, auto`)
+        const hx = fixedHotspot
+          ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
+          : Math.round(sw / 2)
+        const hy = fixedHotspot
+          ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
+          : Math.min(sh - 1, Math.round(sh * 0.93))
+        applyCursor(`url("${src}") ${hx} ${hy}, auto`)
         return
       }
       ctx.drawImage(img, 0, 0, sw, sh)
@@ -146,11 +166,21 @@ export default function App() {
       try {
         dataUrl = canvas.toDataURL('image/png')
       } catch {
-        applyCursor(`url("${src}") ${Math.round(sw / 2)} ${Math.min(sh - 1, Math.round(sh * 0.93))}, auto`)
+        const hx = fixedHotspot
+          ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
+          : Math.round(sw / 2)
+        const hy = fixedHotspot
+          ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
+          : Math.min(sh - 1, Math.round(sh * 0.93))
+        applyCursor(`url("${src}") ${hx} ${hy}, auto`)
         return
       }
-      const hx = Math.round(sw / 2)
-      const hy = Math.min(sh - 1, Math.round(sh * 0.93))
+      const hx = fixedHotspot
+        ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
+        : Math.round(sw / 2)
+      const hy = fixedHotspot
+        ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
+        : Math.min(sh - 1, Math.round(sh * 0.93))
       applyCursor(`url("${dataUrl}") ${hx} ${hy}, auto`)
     }
     img.onerror = () => {
@@ -208,7 +238,7 @@ export default function App() {
         ))}
       </nav>
 
-      {/* Guitar pick cursor — top right: two PNGs only */}
+      {/* Custom cursors — top right: Win95 arrow + pick choices */}
       <div
         className="cursor-pick-wrap"
         role="group"
@@ -218,13 +248,10 @@ export default function App() {
           top: '72px',
           right: '16px',
           zIndex: 199,
-          maxWidth: 'min(200px, calc(100vw - 120px))',
+          maxWidth: 'min(140px, calc(100vw - 120px))',
         }}
       >
-        {[
-          { id: 'thin', label: 'Thin pick cursor' },
-          { id: 'heavy', label: 'Heavy pick cursor' },
-        ].map((opt) => (
+        {CURSOR_OPTIONS.map((opt) => (
           <button
             key={opt.id}
             type="button"
@@ -232,9 +259,9 @@ export default function App() {
             aria-pressed={cursorPick === opt.id}
             aria-label={opt.label}
             onClick={() => setCursorPick(opt.id)}
-            className={`cursor-pick-choice ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
+            className={`cursor-pick-choice ${opt.id === 'win95' ? 'cursor-pick-choice--win95' : ''} ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
           >
-            <img src={opt.id === 'thin' ? CURSOR_PICK_THIN : CURSOR_PICK_HEAVY} alt="" draggable={false} />
+            <img src={opt.src} alt="" draggable={false} />
           </button>
         ))}
       </div>
@@ -391,15 +418,15 @@ export default function App() {
         </header>
 
         <section
-          id="music"
+          id="about"
           style={{
             marginTop: '64px',
-            marginBottom: '24px',
+            marginBottom: '0',
+            position: 'relative',
+            zIndex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            position: 'relative',
-            zIndex: 3,
           }}
         >
           <h2
@@ -410,147 +437,6 @@ export default function App() {
               textTransform: 'uppercase',
               marginBottom: '24px',
               alignSelf: 'stretch',
-            }}
-          >
-            Music
-          </h2>
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '700px',
-              marginBottom: '32px',
-              alignSelf: 'center',
-            }}
-          >
-            <iframe
-              title="Fran Nogueira — RECS no Spotify"
-              src={SPOTIFY_PLAYLIST_EMBED_SRC}
-              width="100%"
-              height={352}
-              style={{ border: 'none', borderRadius: '12px', display: 'block', minHeight: '352px' }}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            />
-          </div>
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '700px',
-              minHeight: '320px',
-              isolation: 'isolate',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              margin: '0 auto',
-              alignSelf: 'center',
-            }}
-          >
-            <Bass isWhiteBackground={pageColor.swatch === '#ffffff'} />
-          </div>
-          {!showMusicPlayer && (
-            <button
-              type="button"
-              className="win95-btn"
-              onClick={() => setShowMusicPlayer(true)}
-              style={{
-                marginTop: '24px',
-                padding: '8px 16px',
-                fontSize: '11px',
-              }}
-            >
-              Open Music Player
-            </button>
-          )}
-        </section>
-
-        <section
-          id="content"
-          style={{
-            marginTop: '80px',
-            position: 'relative',
-            zIndex: 5,
-            isolation: 'isolate',
-            paddingBottom: 'clamp(48px, 10vw, 120px)',
-            scrollMarginTop: '72px',
-          }}
-        >
-          <h2
-            className="content-section-heading section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-            }}
-          >
-            Content
-          </h2>
-          <div className="content-section-body">
-            <ContentReels />
-          </div>
-        </section>
-
-        <section id="gallery" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-            }}
-          >
-            Gallery
-          </h2>
-          <Gallery />
-        </section>
-
-        <section
-          id="shows"
-          style={{
-            marginTop: '80px',
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-              width: '100%',
-              textAlign: 'center',
-            }}
-          >
-            Shows
-          </h2>
-          <ShowPictures />
-        </section>
-
-        <section
-          id="about"
-          style={{
-            marginTop: '80px',
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-              width: '100%',
-              textAlign: 'center',
             }}
           >
             About me
@@ -655,6 +541,146 @@ export default function App() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section
+          id="music"
+          style={{
+            marginTop: '80px',
+            marginBottom: '24px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative',
+            zIndex: 3,
+          }}
+        >
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              alignSelf: 'stretch',
+            }}
+          >
+            Music
+          </h2>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '700px',
+              marginBottom: '32px',
+              alignSelf: 'center',
+            }}
+          >
+            <iframe
+              title="Fran Nogueira — RECS no Spotify"
+              src={SPOTIFY_PLAYLIST_EMBED_SRC}
+              width="100%"
+              height={352}
+              style={{ border: 'none', borderRadius: '12px', display: 'block', minHeight: '352px' }}
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            />
+          </div>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '700px',
+              minHeight: '320px',
+              isolation: 'isolate',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '0 auto',
+              alignSelf: 'center',
+            }}
+          >
+            <Bass isWhiteBackground={pageColor.swatch === '#ffffff'} />
+          </div>
+          {!showMusicPlayer && (
+            <button
+              type="button"
+              className="win95-btn"
+              onClick={() => setShowMusicPlayer(true)}
+              style={{
+                marginTop: '24px',
+                padding: '8px 16px',
+                fontSize: '11px',
+              }}
+            >
+              Open Music Player
+            </button>
+          )}
+        </section>
+
+        <section id="gallery" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+            }}
+          >
+            Gallery
+          </h2>
+          <Gallery />
+        </section>
+
+        <section
+          id="content"
+          style={{
+            marginTop: '80px',
+            position: 'relative',
+            zIndex: 5,
+            isolation: 'isolate',
+            paddingBottom: 'clamp(48px, 10vw, 120px)',
+            scrollMarginTop: '72px',
+          }}
+        >
+          <h2
+            className="content-section-heading section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Content
+          </h2>
+          <div className="content-section-body">
+            <ContentReels />
+          </div>
+        </section>
+
+        <section
+          id="shows"
+          style={{
+            marginTop: '80px',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <h2
+            className="section-heading"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              marginBottom: '24px',
+              alignSelf: 'stretch',
+            }}
+          >
+            Shows
+          </h2>
+          <ShowPictures />
         </section>
 
         <section id="contact" style={{ marginTop: '80px', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
