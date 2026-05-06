@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import InstagramEmbed from '../InstagramEmbed/InstagramEmbed'
+import { t } from '../../i18n'
 
 /** Instagram /p/ permalinks — blockquote embed (same proportions as before: min 326px, max 540px) */
 const CONTENT_REELS = [
@@ -16,7 +17,7 @@ const EASE = 'cubic-bezier(0.33, 1, 0.68, 1)'
 const IPHONE_FRAME_PNG =
   'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/IPhone_5.png'
 
-export default function ContentReels() {
+export default function ContentReels({ locale }) {
   const [index, setIndex] = useState(0)
   const [embedVisible, setEmbedVisible] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -58,7 +59,7 @@ export default function ContentReels() {
         boxSizing: 'border-box',
       }}
     >
-      <button type="button" className="content-reel-arrow" aria-label="Reel anterior" onClick={goPrev} disabled={busy} aria-busy={busy}>
+      <button type="button" className="content-reel-arrow" aria-label={t(locale, 'contentReelPrevAria')} onClick={goPrev} disabled={busy} aria-busy={busy}>
         ‹
       </button>
       <div
@@ -109,7 +110,7 @@ export default function ContentReels() {
           <InstagramEmbed key={current.id} permalink={current.permalink} />
         </div>
       </div>
-      <button type="button" className="content-reel-arrow" aria-label="Próximo reel" onClick={goNext} disabled={busy} aria-busy={busy}>
+      <button type="button" className="content-reel-arrow" aria-label={t(locale, 'contentReelNextAria')} onClick={goNext} disabled={busy} aria-busy={busy}>
         ›
       </button>
     </div>

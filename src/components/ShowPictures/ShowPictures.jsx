@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { t, tVars, weekdayHeaders } from '../../i18n'
 
 /** Reference year for calendar grid (dates are PT-BR day/month from the brief) */
 const SHOW_YEAR = 2025
@@ -52,30 +53,30 @@ function getMonthCells(year, monthIndex) {
   return cells
 }
 
-const WEEKDAYS_PT = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb']
-
-export default function ShowPictures() {
+export default function ShowPictures({ locale }) {
+  const localeTag = locale === 'pt-BR' ? 'pt-BR' : 'en-US'
   const [index, setIndex] = useState(0)
   const current = SHOW_ITEMS[index]
+  const weekdays = useMemo(() => weekdayHeaders(locale), [locale])
 
   const monthLabel = useMemo(() => {
     const d = new Date(current.year, current.month - 1, 1)
-    return d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-  }, [current.month, current.year])
+    return d.toLocaleDateString(localeTag, { month: 'long', year: 'numeric' })
+  }, [current.month, current.year, localeTag])
 
   const cells = useMemo(
     () => getMonthCells(current.year, current.month - 1),
     [current.month, current.year]
   )
 
-  const dateFullPt = useMemo(
+  const dateFull = useMemo(
     () =>
-      new Date(current.year, current.month - 1, current.day).toLocaleDateString('pt-BR', {
+      new Date(current.year, current.month - 1, current.day).toLocaleDateString(localeTag, {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
       }),
-    [current.day, current.month, current.year]
+    [current.day, current.month, current.year, localeTag]
   )
 
   const goPrev = () => setIndex((i) => (i - 1 + SHOW_ITEMS.length) % SHOW_ITEMS.length)
@@ -116,7 +117,7 @@ export default function ShowPictures() {
             <img
               key={current.src}
               src={current.src}
-              alt={`Show ${dateFullPt}`}
+              alt={tVars(locale, 'showsImgAlt', { date: dateFull })}
               style={{
                 width: '100%',
                 height: 'auto',
@@ -137,10 +138,10 @@ export default function ShowPictures() {
           }}
         >
           <button type="button" className="win95-btn" onClick={goPrev} style={{ padding: '6px 14px', fontSize: '11px' }}>
-            ◀ anterior
+            {t(locale, 'showsPrev')}
           </button>
           <button type="button" className="win95-btn" onClick={goNext} style={{ padding: '6px 14px', fontSize: '11px' }}>
-            próximo ▶
+            {t(locale, 'showsNext')}
           </button>
         </div>
         <p
@@ -152,7 +153,7 @@ export default function ShowPictures() {
             opacity: 0.85,
           }}
         >
-          {index + 1} / {SHOW_ITEMS.length} — {dateFullPt}
+          {index + 1} / {SHOW_ITEMS.length} — {dateFull}
         </p>
       </div>
 
@@ -182,7 +183,7 @@ export default function ShowPictures() {
               fontFamily: 'MS Sans Serif, Tahoma, sans-serif',
             }}
           >
-            Calendário
+            {t(locale, 'showsCalendarTitle')}
           </div>
           <div
             style={{
@@ -213,7 +214,7 @@ export default function ShowPictures() {
                 color: '#404040',
               }}
             >
-              {WEEKDAYS_PT.map((w) => (
+              {weekdays.map((w) => (
                 <div key={w}>{w}</div>
               ))}
             </div>
@@ -261,7 +262,7 @@ export default function ShowPictures() {
                 textAlign: 'center',
               }}
             >
-              Data do show: <strong>{dateFullPt}</strong>
+              {t(locale, 'showsDateLabel')} <strong>{dateFull}</strong>
             </div>
           </div>
         </div>
@@ -282,7 +283,7 @@ export default function ShowPictures() {
             boxSizing: 'border-box',
           }}
         >
-          agende o próximo show!
+          {t(locale, 'showsBookCta')}
         </a>
       </div>
     </div>

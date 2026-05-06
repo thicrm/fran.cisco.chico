@@ -4,14 +4,21 @@ import ContentReels from './components/ContentReels/ContentReels'
 import ShowPictures from './components/ShowPictures/ShowPictures'
 import Gallery from './components/Gallery/Gallery'
 import Bass from './components/Bass/Bass'
+import {
+  readStoredLocale,
+  LOCALE_STORAGE_KEY,
+  localeToHtmlLang,
+  t,
+  tVars,
+} from './i18n'
 
-const NAV_ITEMS = [
-  { id: 'about', label: 'about me', hoverClass: 'nav-hover-about' },
-  { id: 'music', label: 'music', hoverClass: 'nav-hover-music' },
-  { id: 'gallery', label: 'gallery', hoverClass: 'nav-hover-gallery' },
-  { id: 'content', label: 'content', hoverClass: 'nav-hover-content' },
-  { id: 'shows', label: 'shows', hoverClass: 'nav-hover-shows' },
-  { id: 'contact', label: 'contact', hoverClass: 'nav-hover-contact' },
+const NAV_DEF = [
+  { id: 'about', tKey: 'navAbout', hoverClass: 'nav-hover-about' },
+  { id: 'music', tKey: 'navMusic', hoverClass: 'nav-hover-music' },
+  { id: 'gallery', tKey: 'navGallery', hoverClass: 'nav-hover-gallery' },
+  { id: 'content', tKey: 'navContent', hoverClass: 'nav-hover-content' },
+  { id: 'shows', tKey: 'navShows', hoverClass: 'nav-hover-shows' },
+  { id: 'contact', tKey: 'navContact', hoverClass: 'nav-hover-contact' },
 ]
 
 // Contact links - update with your details
@@ -61,10 +68,10 @@ const CURSOR_PICK_HEAVY = '/cursors/palheta_heavy.png'
 const CURSOR_WIN95 = '/cursors/win95_arrow.png'
 
 /** Picker + effect: Win95 arrow (default), guitar picks */
-const CURSOR_OPTIONS = [
-  { id: 'win95', label: 'Windows 95 arrow cursor', src: CURSOR_WIN95 },
-  { id: 'thin', label: 'Thin pick cursor', src: CURSOR_PICK_THIN },
-  { id: 'heavy', label: 'Heavy pick cursor', src: CURSOR_PICK_HEAVY },
+const CURSOR_PICK_DEF = [
+  { id: 'win95', labelKey: 'cursorWin95', src: CURSOR_WIN95 },
+  { id: 'thin', labelKey: 'cursorThin', src: CURSOR_PICK_THIN },
+  { id: 'heavy', labelKey: 'cursorHeavy', src: CURSOR_PICK_HEAVY },
 ]
 
 /** Hotspot in source image pixels (tip of arrow); picks use bottom-center heuristic instead */
@@ -81,6 +88,7 @@ function readStoredCursorPick() {
 }
 
 export default function App() {
+  const [locale, setLocale] = useState(readStoredLocale)
   const [cursorPick, setCursorPick] = useState(readStoredCursorPick)
   const [showMusicPlayer, setShowMusicPlayer] = useState(true)
   const [pageColor, setPageColor] = useState({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
@@ -98,6 +106,18 @@ export default function App() {
     setVideoReady(false)
     setPageColor({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
   }
+
+  useEffect(() => {
+    document.documentElement.lang = localeToHtmlLang(locale)
+  }, [locale])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, locale)
+    } catch {
+      /* ignore */
+    }
+  }, [locale])
 
   useEffect(() => {
     try {
@@ -129,7 +149,7 @@ export default function App() {
 
     root.classList.add('cursor-pick-active')
 
-    const opt = CURSOR_OPTIONS.find((o) => o.id === cursorPick)
+    const opt = CURSOR_PICK_DEF.find((o) => o.id === cursorPick)
     const src = opt?.src ?? CURSOR_WIN95
     const fixedHotspot = CURSOR_HOTSPOT_PIXELS[cursorPick]
 
@@ -205,44 +225,90 @@ export default function App() {
           backgroundColor: '#ffffff',
           borderBottom: '1px solid #eee',
           padding: '16px 40px',
-          display: 'flex',
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '32px',
+          columnGap: '16px',
         }}
       >
-        {NAV_ITEMS.map((item) => (
-          <button
-            key={item.id}
-            className={`nav-link ${item.hoverClass}`}
-            onClick={() => {
-              scrollToSection(item.id)
-              if (item.id === 'music') setShowMusicPlayer(true)
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              padding: 0,
-              fontSize: '12px',
-              letterSpacing: '0.1em',
-              color: '#333',
-              cursor: 'pointer',
-              textTransform: 'lowercase',
-              transition: 'color 0.2s ease',
-              fontWeight: 300,
-              fontFamily: '"Montserrat", sans-serif',
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
+        <div aria-hidden style={{ minWidth: 0 }} />
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '32px',
+          }}
+        >
+          {NAV_DEF.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`nav-link ${item.hoverClass}`}
+              onClick={() => {
+                scrollToSection(item.id)
+                if (item.id === 'music') setShowMusicPlayer(true)
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontSize: '12px',
+                letterSpacing: '0.1em',
+                color: '#333',
+                cursor: 'pointer',
+                textTransform: 'lowercase',
+                transition: 'color 0.2s ease',
+                fontWeight: 300,
+                fontFamily: '"Montserrat", sans-serif',
+              }}
+            >
+              {t(locale, item.tKey)}
+            </button>
+          ))}
+        </div>
+        <div
+          role="group"
+          aria-label={t(locale, 'ariaLangSwitch')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            gap: '10px',
+            minWidth: 0,
+          }}
+        >
+          {(['pt-BR', 'en-US']).map((code) => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setLocale(code)}
+              aria-pressed={locale === code}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: '2px 0',
+                fontSize: '12px',
+                letterSpacing: '0.06em',
+                color: locale === code ? '#111' : '#888',
+                cursor: 'pointer',
+                transition: 'color 0.2s ease, font-weight 0.15s ease',
+                fontWeight: locale === code ? 600 : 400,
+                fontFamily: '"Montserrat", sans-serif',
+              }}
+            >
+              {code}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* Custom cursors — top right: Win95 arrow + pick choices */}
       <div
         className="cursor-pick-wrap"
         role="group"
-        aria-label="Mouse cursor style"
+        aria-label={t(locale, 'ariaCursorPick')}
         style={{
           position: 'fixed',
           top: '72px',
@@ -251,13 +317,13 @@ export default function App() {
           maxWidth: 'min(140px, calc(100vw - 120px))',
         }}
       >
-        {CURSOR_OPTIONS.map((opt) => (
+        {CURSOR_PICK_DEF.map((opt) => (
           <button
             key={opt.id}
             type="button"
-            title={opt.label}
+            title={t(locale, opt.labelKey)}
             aria-pressed={cursorPick === opt.id}
-            aria-label={opt.label}
+            aria-label={t(locale, opt.labelKey)}
             onClick={() => setCursorPick(opt.id)}
             className={`cursor-pick-choice ${opt.id === 'win95' ? 'cursor-pick-choice--win95' : ''} ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
           >
@@ -309,7 +375,7 @@ export default function App() {
           ))}
           <button
             onClick={handleVideoBackgroundSelect}
-            title="Video background"
+            title={t(locale, 'tooltipVideoBg')}
             style={{
               position: 'relative',
               width: '28px',
@@ -345,7 +411,7 @@ export default function App() {
       {/* Music player - floating, sized to content so doesn't block page */}
       {showMusicPlayer && (
         <div style={{ position: 'fixed', zIndex: 500 }}>
-          <MusicPlayer onClose={() => setShowMusicPlayer(false)} />
+          <MusicPlayer locale={locale} onClose={() => setShowMusicPlayer(false)} />
         </div>
       )}
 
@@ -413,7 +479,7 @@ export default function App() {
               textTransform: 'lowercase',
             }}
           >
-            Musician • Bassist • Guitarist • Drummer • Producer
+            {t(locale, 'heroTagline')}
           </p>
         </header>
 
@@ -439,7 +505,7 @@ export default function App() {
               alignSelf: 'stretch',
             }}
           >
-            About me
+            {t(locale, 'sectionAbout')}
           </h2>
           <div
             style={{
@@ -508,7 +574,7 @@ export default function App() {
                     color: '#000',
                   }}
                 >
-                  File  Edit  Format  View  Help
+                  {t(locale, 'notepadMenubarAbout')}
                 </div>
                 {/* White notepad content area with scrollbar */}
                 <div
@@ -526,16 +592,16 @@ export default function App() {
                   }}
                 >
                   <p style={{ margin: 0, marginBottom: '0.8em' }}>
-                    Francisco Chico is a musician, bassist, guitarist, drummer, producer, and content creator based in [location].
+                    {t(locale, 'aboutBio1')}
                   </p>
                   <p style={{ margin: 0, marginBottom: '0.8em' }}>
-                    With a passion for crafting sounds across multiple instruments and production styles, the focus is on collaboration and bringing creative visions to life—whether in the studio, on stage, or through digital content.
+                    {t(locale, 'aboutBio2')}
                   </p>
                   <p style={{ margin: 0, marginBottom: '0.8em' }}>
-                    Available for sessions, collaborations, and creative projects.
+                    {t(locale, 'aboutBio3')}
                   </p>
                   <p style={{ margin: 0 }}>
-                    Reach out to connect and create.
+                    {t(locale, 'aboutBio4')}
                   </p>
                 </div>
               </div>
@@ -565,7 +631,7 @@ export default function App() {
               alignSelf: 'stretch',
             }}
           >
-            Music
+            {t(locale, 'sectionMusic')}
           </h2>
           <div
             style={{
@@ -576,7 +642,7 @@ export default function App() {
             }}
           >
             <iframe
-              title="Fran Nogueira — RECS no Spotify"
+              title={t(locale, 'spotifyIframeTitle')}
               src={SPOTIFY_PLAYLIST_EMBED_SRC}
               width="100%"
               height={352}
@@ -611,7 +677,7 @@ export default function App() {
                 fontSize: '11px',
               }}
             >
-              Open Music Player
+              {t(locale, 'openMusicPlayer')}
             </button>
           )}
         </section>
@@ -626,9 +692,9 @@ export default function App() {
               marginBottom: '24px',
             }}
           >
-            Gallery
+            {t(locale, 'sectionGallery')}
           </h2>
-          <Gallery />
+          <Gallery locale={locale} />
         </section>
 
         <section
@@ -650,10 +716,10 @@ export default function App() {
               textTransform: 'uppercase',
             }}
           >
-            Content
+            {t(locale, 'sectionContent')}
           </h2>
           <div className="content-section-body">
-            <ContentReels />
+            <ContentReels locale={locale} />
           </div>
         </section>
 
@@ -678,9 +744,9 @@ export default function App() {
               alignSelf: 'stretch',
             }}
           >
-            Shows
+            {t(locale, 'sectionShows')}
           </h2>
-          <ShowPictures />
+          <ShowPictures locale={locale} />
         </section>
 
         <section id="contact" style={{ marginTop: '80px', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
@@ -693,7 +759,7 @@ export default function App() {
               marginBottom: '24px',
             }}
           >
-            Contact
+            {t(locale, 'sectionContact')}
           </h2>
           <div
             style={{
@@ -716,7 +782,7 @@ export default function App() {
                 gap: '6px',
               }}
             >
-              ✉ Email
+              {t(locale, 'contactEmailLabel')}
             </a>
             <a
               href={CONTACT_LINKS.whatsapp}
@@ -733,7 +799,7 @@ export default function App() {
                 gap: '6px',
               }}
             >
-              WhatsApp
+              {t(locale, 'contactWhatsappLabel')}
             </a>
             <a
               href={CONTACT_LINKS.instagram}
@@ -750,7 +816,7 @@ export default function App() {
                 gap: '6px',
               }}
             >
-              Instagram
+              {t(locale, 'contactInstagramLabel')}
             </a>
             <a
               href={CONTACT_LINKS.tiktok}
@@ -767,7 +833,7 @@ export default function App() {
                 gap: '6px',
               }}
             >
-              TikTok
+              {t(locale, 'contactTiktokLabel')}
             </a>
           </div>
         </section>
@@ -793,7 +859,7 @@ export default function App() {
             `,
           }}
         >
-          © {new Date().getFullYear()} Francisco Chico
+          {tVars(locale, 'footerCopyright', { year: new Date().getFullYear() })}
         </footer>
         </div>
       </main>

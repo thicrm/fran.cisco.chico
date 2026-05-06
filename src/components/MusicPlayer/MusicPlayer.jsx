@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import Draggable from 'react-draggable'
+import { t, tVars } from '../../i18n'
 
 /**
  * Music player - Windows 95 style, draggable
@@ -48,7 +49,7 @@ const TRACKS = [
   },
 ]
 
-export default function MusicPlayer({ onClose }) {
+export default function MusicPlayer({ onClose, locale }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [volume, setVolume] = useState(0.5)
   const [currentTrack, setCurrentTrack] = useState(0)
@@ -89,7 +90,7 @@ export default function MusicPlayer({ onClose }) {
     if (isPlaying) {
       if (audio.readyState >= 2) {
         audio.play().catch((e) => {
-          setError('Playback failed')
+          setError(t(locale, 'musicPlaybackFailed'))
           setIsPlaying(false)
         })
       }
@@ -101,7 +102,7 @@ export default function MusicPlayer({ onClose }) {
   const handleCanPlay = () => {
     if (isPlayingRef.current && audioRef.current) {
       audioRef.current.play().catch((e) => {
-        setError('Playback failed')
+        setError(t(locale, 'musicPlaybackFailed'))
         setIsPlaying(false)
       })
     }
@@ -116,12 +117,12 @@ export default function MusicPlayer({ onClose }) {
   }
 
   const handleError = () => {
-    setError('Failed to load audio')
+    setError(t(locale, 'musicLoadFailed'))
     setIsPlaying(false)
   }
 
   const formatTime = (date) => {
-    return date.toLocaleTimeString('en-US', {
+    return date.toLocaleTimeString(t(locale, 'musicTimeLocale'), {
       hour: '2-digit',
       minute: '2-digit',
       hour12: true,
@@ -170,7 +171,7 @@ export default function MusicPlayer({ onClose }) {
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ fontSize: '14px' }}>🎵</span>
-              Francisco Chico music player
+              {t(locale, 'musicTitleBar')}
             </span>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <button
@@ -188,7 +189,7 @@ export default function MusicPlayer({ onClose }) {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                title="Close"
+                title={t(locale, 'musicClose')}
               >
                 ×
               </button>
@@ -206,7 +207,7 @@ export default function MusicPlayer({ onClose }) {
               color: '#000',
             }}
           >
-            File  Edit  Options  Help
+            {t(locale, 'musicMenubar')}
           </div>
 
           {/* Client area - Win95 gray */}
@@ -250,7 +251,7 @@ export default function MusicPlayer({ onClose }) {
                 marginBottom: '12px',
               }}
             >
-              <span>Volume:-</span>
+              <span>{t(locale, 'musicVolume')}</span>
               <div style={{ display: 'flex', gap: '1px' }}>
                 {Array.from({ length: volumeBars }).map((_, i) => (
                   <div
@@ -286,7 +287,7 @@ export default function MusicPlayer({ onClose }) {
                   textTransform: 'uppercase',
                 }}
               >
-                Playlist
+                {t(locale, 'musicPlaylist')}
               </div>
               <div
                 style={{
@@ -327,7 +328,8 @@ export default function MusicPlayer({ onClose }) {
                 <span style={{ color: '#c00' }}>{error}</span>
               ) : (
                 <>
-                  {isPlaying ? 'Playing' : 'Paused'} - Track {currentTrack + 1} of {TRACKS.length}
+                  {isPlaying ? t(locale, 'musicStatusPlaying') : t(locale, 'musicStatusPaused')} —{' '}
+                  {tVars(locale, 'musicTrackOf', { current: currentTrack + 1, total: TRACKS.length })}
                 </>
               )}
             </div>
@@ -342,7 +344,7 @@ export default function MusicPlayer({ onClose }) {
                 fontSize: '11px',
               }}
             >
-              {isPlaying ? 'Pause' : 'Start'}
+              {isPlaying ? t(locale, 'musicPause') : t(locale, 'musicStart')}
             </button>
 
             {/* Links */}
@@ -355,10 +357,10 @@ export default function MusicPlayer({ onClose }) {
               }}
             >
               <a href="#" style={{ color: '#000080', textDecoration: 'underline' }}>
-                Full Sets on Soundcloud
+                {t(locale, 'musicSoundcloudLink')}
               </a>
               <a href="#" style={{ color: '#000080', textDecoration: 'underline' }}>
-                Watch on YouTube
+                {t(locale, 'musicYoutubeLink')}
               </a>
             </div>
           </div>
@@ -375,8 +377,8 @@ export default function MusicPlayer({ onClose }) {
               color: '#000',
             }}
           >
-            <span>Music Player</span>
-            <span>Francisco Chico</span>
+            <span>{t(locale, 'musicFooterPlayer')}</span>
+            <span>{t(locale, 'musicFooterArtist')}</span>
             <span>{formatTime(currentTime)}</span>
           </div>
         </div>

@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { GALLERY_IMAGES } from '../../data/gallery-images'
+import { t, tVars } from '../../i18n'
 
 /**
  * Gallery - minimal horizontal scroll, ~2 images visible
  * Trackpad, swipe, wheel + minimal arrows. Hides images that fail to load.
  * Click image to view full size with blurred backdrop.
  */
-export default function Gallery() {
+export default function Gallery({ locale }) {
   const scrollRef = useRef(null)
   const [failedUrls, setFailedUrls] = useState(new Set())
   const [lightboxSrc, setLightboxSrc] = useState(null)
@@ -66,7 +67,7 @@ export default function Gallery() {
       <button
         type="button"
         onClick={() => scrollByOne(-1)}
-        aria-label="Previous"
+        aria-label={t(locale, 'galleryPrevAria')}
         style={{
           position: 'absolute',
           left: 0,
@@ -92,7 +93,7 @@ export default function Gallery() {
       <button
         type="button"
         onClick={() => scrollByOne(1)}
-        aria-label="Next"
+        aria-label={t(locale, 'galleryNextAria')}
         style={{
           position: 'absolute',
           right: 0,
@@ -147,7 +148,7 @@ export default function Gallery() {
           >
             <img
               src={src}
-              alt={`Gallery ${i + 1}`}
+              alt={tVars(locale, 'galleryAlt', { n: i + 1 })}
               onError={() => handleImageError(src)}
               style={{
                 width: '100%',
@@ -165,7 +166,7 @@ export default function Gallery() {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="View image"
+        aria-label={t(locale, 'galleryLightboxAria')}
         onClick={() => setLightboxSrc(null)}
         style={{
           position: 'fixed',
@@ -182,7 +183,7 @@ export default function Gallery() {
       >
         <img
           src={lightboxSrc}
-          alt="Full size"
+          alt={t(locale, 'galleryFullSizeAlt')}
           onClick={(e) => e.stopPropagation()}
           style={{
             maxWidth: '90vw',
