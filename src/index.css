@@ -47,6 +47,118 @@ body::-webkit-scrollbar,
   cursor: inherit;
 }
 
+/* Site header — balanced desktop nav; mobile hamburger + stacked section links */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eee;
+  padding: 12px clamp(14px, 4vw, 40px);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 16px;
+}
+
+.site-nav__menu-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 5px;
+  width: 40px;
+  height: 36px;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.site-nav__menu-btn:hover {
+  background: #f3f3f3;
+}
+
+.site-nav__menu-bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #333;
+  border-radius: 1px;
+}
+
+.site-nav__links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 32px;
+  grid-column: 2;
+  justify-self: center;
+}
+
+.site-nav__lang {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+  grid-column: 3;
+  justify-self: end;
+}
+
+@media (max-width: 720px) {
+  .site-nav {
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    row-gap: 0;
+  }
+
+  .site-nav__menu-btn {
+    display: inline-flex;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .site-nav__lang {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .site-nav__links {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    gap: 0;
+    width: 100%;
+    padding-top: 10px;
+    margin-top: 8px;
+    border-top: 1px solid #eee;
+    justify-self: stretch;
+  }
+
+  .site-nav__links--open {
+    display: flex;
+  }
+
+  .site-nav__links .nav-link {
+    text-align: left;
+    padding: 12px 2px;
+    border-bottom: 1px solid #f0f0f0;
+    width: 100%;
+  }
+
+  .site-nav__links .nav-link:last-of-type {
+    border-bottom: none;
+  }
+}
+
 /*
  * Custom image cursors: interactive elements often set cursor:pointer inline.
  * !important beats those so the chosen cursor stays visible (inherit walks up to html’s url()).
@@ -61,7 +173,7 @@ html.cursor-pick-active .win95-title-bar {
   cursor: move !important;
 }
 
-/* Cursor picker — Win95 arrow + pick PNGs; glow on selected image (compact, ~50% scale) */
+/* Cursor picker — classic arrow + pick PNGs */
 .cursor-pick-wrap {
   display: flex;
   flex-direction: row;
@@ -96,14 +208,15 @@ html.cursor-pick-active .win95-title-bar {
   transition: filter 0.28s ease;
 }
 
-.cursor-pick-choice--win95 img {
-  width: 21px;
-  max-height: 24px;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+.cursor-pick-classic-svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
 }
 
-.cursor-pick-choice--selected img {
+.cursor-pick-choice--selected img,
+.cursor-pick-choice--selected .cursor-pick-classic-svg {
   filter:
     drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
     drop-shadow(0 0 6px rgba(255, 255, 255, 0.65))
@@ -130,11 +243,14 @@ html.cursor-pick-active .win95-title-bar {
   padding: 1px 0 0 1px;
 }
 
-/* Main section titles — Anton (same as hero); full strength text color */
+/* Main section titles — Anton (same as hero); caps, slightly compact per brief */
 .section-heading {
   font-family: "Anton", sans-serif;
   font-weight: 700;
   color: currentColor;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
 }
 
 /* Content section — title always above reels (explicit grid rows; avoids flex/order quirks) */

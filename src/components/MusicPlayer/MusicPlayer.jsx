@@ -9,42 +9,42 @@ import { t, tVars } from '../../i18n'
 const TRACKS = [
   {
     title: 'composição',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/composi%C3%A7%C3%A3o.wav',
   },
   {
     title: 'diskaum MIX FINAL',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/diskaum%20MIX%20FINAL.wav',
   },
   {
     title: 'fonk',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/fonk.wav',
   },
   {
     title: 'house vibez',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/house%20vibez.wav',
   },
   {
     title: 'llllllll',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/llllllll.wav',
   },
   {
     title: 'nova iorque',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/nova%20iorque.wav',
   },
   {
     title: 'shuffle',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/shuffle.wav',
   },
   {
     title: 'tréopi',
-    artist: 'Francisco Chico',
+    artist: 'Francisco Nogueira',
     src: 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.dev/sec%CC%A7a%CC%83o%20music/%C3%A1udios%20player/tr%C3%A9opi.wav',
   },
 ]
@@ -231,7 +231,7 @@ export default function MusicPlayer({ onClose, locale }) {
                 letterSpacing: '0.05em',
               }}
             >
-              ⣿ Francisco Chico ⣿
+              ⣿ Francisco Nogueira ⣿
             </div>
 
             {/* Track info */}

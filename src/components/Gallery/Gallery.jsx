@@ -3,9 +3,7 @@ import { GALLERY_IMAGES } from '../../data/gallery-images'
 import { t, tVars } from '../../i18n'
 
 /**
- * Gallery - minimal horizontal scroll, ~2 images visible
- * Trackpad, swipe, wheel + minimal arrows. Hides images that fail to load.
- * Click image to view full size with blurred backdrop.
+ * Gallery - horizontal scroll + arrow buttons (vertical wheel scrolls the page, not hijacked).
  */
 export default function Gallery({ locale }) {
   const scrollRef = useRef(null)
@@ -41,23 +39,6 @@ export default function Gallery({ locale }) {
     const step = firstChild ? firstChild.offsetWidth + 12 : el.clientWidth
     el.scrollBy({ left: direction * step, behavior: 'smooth' })
   }, [images.length])
-
-  // Map vertical wheel to horizontal scroll when gallery can scroll in that direction
-  useEffect(() => {
-    const el = scrollRef.current
-    if (!el) return
-    const onWheel = (e) => {
-      if (e.deltaY === 0) return
-      const canScrollLeft = el.scrollLeft > 0
-      const canScrollRight = el.scrollLeft < el.scrollWidth - el.clientWidth - 1
-      if ((e.deltaY > 0 && canScrollRight) || (e.deltaY < 0 && canScrollLeft)) {
-        e.preventDefault()
-        el.scrollLeft += e.deltaY
-      }
-    }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [])
 
   if (images.length === 0) return null
 

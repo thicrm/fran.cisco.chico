@@ -27,6 +27,8 @@ const CONTACT_LINKS = {
   whatsapp: 'https://wa.me/',
   instagram: 'https://instagram.com/',
   tiktok: 'https://tiktok.com/@',
+  /** Place `public/resume.pdf` (or update to hosted PDF URL) */
+  resume: '/resume.pdf',
 }
 
 // Use mp4 for broad browser support. For faster loading, re-encode with: ffmpeg -i input.mov -c:v libx264 -movflags +faststart -preset fast -crf 26 -vf "scale=-2:720" output.mp4
@@ -38,58 +40,103 @@ const VIDEO_BACKGROUND_MOV = 'https://pub-da3fda702d23470fbab5a502b13cac38.r2.de
 const SPOTIFY_PLAYLIST_EMBED_SRC =
   'https://open.spotify.com/embed/playlist/3ukURI59vkk4vXHjHpebJi?utm_source=generator'
 
-// Strong backgrounds (gradient like music player) + pastel text
+// Solid page backgrounds only (no gradients)
 const PAGE_COLORS = [
   { name: 'white', swatch: '#ffffff', bg: '#ffffff', text: '#000000' },
-  { name: 'blue', swatch: '#084a8c', bg: 'linear-gradient(135deg, #000080 0%, #1084d0 50%, #4fc3f7 100%)', text: '#e3f2fd' },
-  { name: 'pink', swatch: '#ad1457', bg: 'linear-gradient(135deg, #880e4f 0%, #e91e63 50%, #f48fb1 100%)', text: '#fce4ec' },
-  { name: 'green', swatch: '#2e7d32', bg: 'linear-gradient(135deg, #1b5e20 0%, #43a047 50%, #81c784 100%)', text: '#e8f5e9' },
-  { name: 'purple', swatch: '#6a1b9a', bg: 'linear-gradient(135deg, #4a148c 0%, #7c4dff 50%, #b39ddb 100%)', text: '#ede7f6' },
-  { name: 'orange', swatch: '#e65100', bg: 'linear-gradient(135deg, #bf360c 0%, #ff9800 50%, #ffcc80 100%)', text: '#fff3e0' },
-  { name: 'gold', swatch: '#f57f17', bg: 'linear-gradient(135deg, #e65100 0%, #ffeb3b 50%, #fff9c4 100%)', text: '#fffde7' },
-  { name: 'teal', swatch: '#00695c', bg: 'linear-gradient(135deg, #004d40 0%, #00897b 50%, #4dd0e1 100%)', text: '#e0f2f1' },
+  { name: 'blue', swatch: '#1565c0', bg: '#1565c0', text: '#e3f2fd' },
+  { name: 'pink', swatch: '#c2185b', bg: '#c2185b', text: '#fce4ec' },
+  { name: 'green', swatch: '#2e7d32', bg: '#2e7d32', text: '#e8f5e9' },
+  { name: 'purple', swatch: '#6a1b9a', bg: '#6a1b9a', text: '#ede7f6' },
+  { name: 'orange', swatch: '#e65100', bg: '#e65100', text: '#fff3e0' },
+  { name: 'gold', swatch: '#f9a825', bg: '#f9a825', text: '#fffde7' },
+  { name: 'teal', swatch: '#00897b', bg: '#00897b', text: '#e0f2f1' },
 ]
 
 function scrollToSection(id) {
   document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 }
 
-function hexToRgba(hex, alpha) {
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  return `rgba(${r},${g},${b},${alpha})`
+/** Picker glyph — Win95-style white arrow with black outline (actual cursor stays system default) */
+function CursorClassicGlyph() {
+  return (
+    <svg className="cursor-pick-classic-svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden>
+      <path
+        fill="#ffffff"
+        stroke="#000000"
+        strokeWidth={1.25}
+        strokeLinejoin="miter"
+        paintOrder="stroke fill"
+        d="M6 2l2.5 17L12 14l5 8 2-1.2-5.2-9.2H20L6 2z"
+      />
+    </svg>
+  )
 }
 
 const CURSOR_STORAGE_KEY = 'fran-cursor-pick'
 /** Same-origin assets in /public/cursors — avoids CORS tainting canvas & cross-origin cursor limits */
 const CURSOR_PICK_THIN = '/cursors/palheta_thin.png'
 const CURSOR_PICK_HEAVY = '/cursors/palheta_heavy.png'
-const CURSOR_WIN95 = '/cursors/win95_arrow.png'
 
-/** Picker + effect: Win95 arrow (default), guitar picks */
+/** Picker: classic (system) arrow + guitar picks */
 const CURSOR_PICK_DEF = [
-  { id: 'win95', labelKey: 'cursorWin95', src: CURSOR_WIN95 },
+  { id: 'classic', labelKey: 'cursorClassic', src: null },
   { id: 'thin', labelKey: 'cursorThin', src: CURSOR_PICK_THIN },
   { id: 'heavy', labelKey: 'cursorHeavy', src: CURSOR_PICK_HEAVY },
 ]
 
-/** Hotspot in source image pixels (tip of arrow); picks use bottom-center heuristic instead */
-const CURSOR_HOTSPOT_PIXELS = { win95: [1, 2] }
-
 function readStoredCursorPick() {
   try {
     const v = localStorage.getItem(CURSOR_STORAGE_KEY)
-    if (v === 'win95' || v === 'thin' || v === 'heavy' || v === 'default') return v
+    if (v === 'thin' || v === 'heavy') return v
+    /* migrate old presets to classic system arrow */
+    if (v === 'win95' || v === 'default' || v === 'classic') return 'classic'
   } catch {
     /* ignore */
   }
-  return 'win95'
+  return 'classic'
+}
+
+const CURSOR_ALPHA_THRESH = 40
+
+function pickIdx(width, x, y) {
+  return (y * width + x) * 4
+}
+
+/** Opaque bbox + bottom-row contact point (tip) in full-image pixel coords */
+function analyzePickShape(data, width, height) {
+  let minX = width
+  let minY = height
+  let maxX = 0
+  let maxY = 0
+  const t = CURSOR_ALPHA_THRESH
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      if (data[pickIdx(width, x, y) + 3] > t) {
+        minX = Math.min(minX, x)
+        minY = Math.min(minY, y)
+        maxX = Math.max(maxX, x)
+        maxY = Math.max(maxY, y)
+      }
+    }
+  }
+  if (minX > maxX || minY > maxY) return null
+  let tipLo = width
+  let tipHi = -1
+  for (let x = 0; x < width; x++) {
+    if (data[pickIdx(width, x, maxY) + 3] > t) {
+      tipLo = Math.min(tipLo, x)
+      tipHi = Math.max(tipHi, x)
+    }
+  }
+  if (tipHi < 0) return null
+  const tipX = Math.round((tipLo + tipHi) / 2)
+  return { minX, minY, maxX, maxY, tipX }
 }
 
 export default function App() {
   const [locale, setLocale] = useState(readStoredLocale)
   const [cursorPick, setCursorPick] = useState(readStoredCursorPick)
+  const [navMenuOpen, setNavMenuOpen] = useState(false)
   const [showMusicPlayer, setShowMusicPlayer] = useState(true)
   const [pageColor, setPageColor] = useState({ bg: 'transparent', text: '#ffffff', swatch: '#333333' })
   const [useVideoBackground, setUseVideoBackground] = useState(true)
@@ -120,6 +167,22 @@ export default function App() {
   }, [locale])
 
   useEffect(() => {
+    if (!navMenuOpen) return
+    const onDoc = (e) => {
+      if (!e.target.closest?.('.site-nav')) setNavMenuOpen(false)
+    }
+    const onKey = (e) => {
+      if (e.key === 'Escape') setNavMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [navMenuOpen])
+
+  useEffect(() => {
     try {
       localStorage.setItem(CURSOR_STORAGE_KEY, cursorPick)
     } catch {
@@ -139,7 +202,7 @@ export default function App() {
       body.style.cursor = value
     }
 
-    if (cursorPick === 'default') {
+    if (cursorPick === 'default' || cursorPick === 'classic') {
       root.classList.remove('cursor-pick-active')
       clearCursors()
       return () => {
@@ -150,8 +213,14 @@ export default function App() {
     root.classList.add('cursor-pick-active')
 
     const opt = CURSOR_PICK_DEF.find((o) => o.id === cursorPick)
-    const src = opt?.src ?? CURSOR_WIN95
-    const fixedHotspot = CURSOR_HOTSPOT_PIXELS[cursorPick]
+    const src = opt?.src
+    if (!src) {
+      root.classList.remove('cursor-pick-active')
+      clearCursors()
+      return () => {
+        cancelled = true
+      }
+    }
 
     const img = new Image()
     /* same-origin /public — no crossOrigin needed; avoids tainted canvas */
@@ -164,43 +233,61 @@ export default function App() {
         applyCursor(`url("${src}") 16 24, auto`)
         return
       }
-      const scale = Math.min(1, max / Math.max(w, h))
-      const sw = Math.max(1, Math.floor(w * scale))
-      const sh = Math.max(1, Math.floor(h * scale))
-      const canvas = document.createElement('canvas')
-      canvas.width = sw
-      canvas.height = sh
-      const ctx = canvas.getContext('2d')
-      if (!ctx) {
-        const hx = fixedHotspot
-          ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
-          : Math.round(sw / 2)
-        const hy = fixedHotspot
-          ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
-          : Math.min(sh - 1, Math.round(sh * 0.93))
+
+      const srcCanvas = document.createElement('canvas')
+      srcCanvas.width = w
+      srcCanvas.height = h
+      const sctx = srcCanvas.getContext('2d')
+      if (!sctx) {
+        applyCursor(`url("${src}") 16 24, auto`)
+        return
+      }
+      sctx.drawImage(img, 0, 0)
+      const full = sctx.getImageData(0, 0, w, h)
+      const shape = analyzePickShape(full.data, w, h)
+      if (!shape) {
+        applyCursor(`url("${src}") 16 24, auto`)
+        return
+      }
+
+      const { minX, minY, maxX, maxY, tipX } = shape
+      const bw = maxX - minX + 1
+      const bh = maxY - minY + 1
+      const cropped = sctx.getImageData(minX, minY, bw, bh)
+
+      const hotCropX = tipX - minX
+      const hotCropY = maxY - minY
+
+      const scale = Math.min(1, max / Math.max(bw, bh))
+      const sw = Math.max(1, Math.floor(bw * scale))
+      const sh = Math.max(1, Math.floor(bh * scale))
+      const hx = Math.min(sw - 1, Math.max(0, Math.round(hotCropX * scale)))
+      const hy = Math.min(sh - 1, Math.max(0, Math.round(hotCropY * scale)))
+
+      const tmp = document.createElement('canvas')
+      tmp.width = bw
+      tmp.height = bh
+      const tctx = tmp.getContext('2d')
+      const out = document.createElement('canvas')
+      out.width = sw
+      out.height = sh
+      const octx = out.getContext('2d')
+      if (!tctx || !octx) {
         applyCursor(`url("${src}") ${hx} ${hy}, auto`)
         return
       }
-      ctx.drawImage(img, 0, 0, sw, sh)
+      tctx.putImageData(cropped, 0, 0)
+      octx.imageSmoothingEnabled = true
+      octx.imageSmoothingQuality = 'high'
+      octx.drawImage(tmp, 0, 0, bw, bh, 0, 0, sw, sh)
+
       let dataUrl
       try {
-        dataUrl = canvas.toDataURL('image/png')
+        dataUrl = out.toDataURL('image/png')
       } catch {
-        const hx = fixedHotspot
-          ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
-          : Math.round(sw / 2)
-        const hy = fixedHotspot
-          ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
-          : Math.min(sh - 1, Math.round(sh * 0.93))
         applyCursor(`url("${src}") ${hx} ${hy}, auto`)
         return
       }
-      const hx = fixedHotspot
-        ? Math.min(sw - 1, Math.max(0, Math.round(fixedHotspot[0] * scale)))
-        : Math.round(sw / 2)
-      const hy = fixedHotspot
-        ? Math.min(sh - 1, Math.max(0, Math.round(fixedHotspot[1] * scale)))
-        : Math.min(sh - 1, Math.round(sh * 0.93))
       applyCursor(`url("${dataUrl}") ${hx} ${hy}, auto`)
     }
     img.onerror = () => {
@@ -217,36 +304,26 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', fontFamily: '"Montserrat", sans-serif' }}>
-      <nav
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid #eee',
-          padding: '16px 40px',
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          alignItems: 'center',
-          columnGap: '16px',
-        }}
-      >
-        <div aria-hidden style={{ minWidth: 0 }} />
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            gap: '32px',
-          }}
+      <nav className="site-nav">
+        <button
+          type="button"
+          className="site-nav__menu-btn"
+          aria-expanded={navMenuOpen}
+          aria-label={navMenuOpen ? t(locale, 'navMenuClose') : t(locale, 'navMenuOpen')}
+          onClick={() => setNavMenuOpen((o) => !o)}
         >
+          <span className="site-nav__menu-bar" />
+          <span className="site-nav__menu-bar" />
+          <span className="site-nav__menu-bar" />
+        </button>
+        <div className={`site-nav__links ${navMenuOpen ? 'site-nav__links--open' : ''}`}>
           {NAV_DEF.map((item) => (
             <button
               key={item.id}
               type="button"
               className={`nav-link ${item.hoverClass}`}
               onClick={() => {
+                setNavMenuOpen(false)
                 scrollToSection(item.id)
                 if (item.id === 'music') setShowMusicPlayer(true)
               }}
@@ -268,17 +345,7 @@ export default function App() {
             </button>
           ))}
         </div>
-        <div
-          role="group"
-          aria-label={t(locale, 'ariaLangSwitch')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            gap: '10px',
-            minWidth: 0,
-          }}
-        >
+        <div className="site-nav__lang" role="group" aria-label={t(locale, 'ariaLangSwitch')}>
           {(['pt-BR', 'en-US']).map((code) => (
             <button
               key={code}
@@ -304,7 +371,7 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Custom cursors — top right: Win95 arrow + pick choices */}
+      {/* Custom cursors — classic arrow + pick choices */}
       <div
         className="cursor-pick-wrap"
         role="group"
@@ -325,9 +392,9 @@ export default function App() {
             aria-pressed={cursorPick === opt.id}
             aria-label={t(locale, opt.labelKey)}
             onClick={() => setCursorPick(opt.id)}
-            className={`cursor-pick-choice ${opt.id === 'win95' ? 'cursor-pick-choice--win95' : ''} ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
+            className={`cursor-pick-choice ${opt.id === 'classic' ? 'cursor-pick-choice--classic' : ''} ${cursorPick === opt.id ? 'cursor-pick-choice--selected' : ''}`}
           >
-            <img src={opt.src} alt="" draggable={false} />
+            {opt.src ? <img src={opt.src} alt="" draggable={false} /> : <CursorClassicGlyph />}
           </button>
         ))}
       </div>
@@ -467,7 +534,7 @@ export default function App() {
               letterSpacing: '0.02em',
             }}
           >
-            <span className="notepad-at-sign">@</span>Francisco Chico
+            <span className="notepad-at-sign">@</span>Francisco Nogueira
           </h1>
           <p
             style={{
@@ -476,7 +543,6 @@ export default function App() {
               opacity: 0.85,
               fontFamily: '"Montserrat", sans-serif',
               fontWeight: 300,
-              textTransform: 'lowercase',
             }}
           >
             {t(locale, 'heroTagline')}
@@ -495,16 +561,7 @@ export default function App() {
             alignItems: 'center',
           }}
         >
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-              alignSelf: 'stretch',
-            }}
-          >
+          <h2 className="section-heading" style={{ marginBottom: '24px', alignSelf: 'stretch' }}>
             {t(locale, 'sectionAbout')}
           </h2>
           <div
@@ -524,7 +581,6 @@ export default function App() {
                 backgroundColor: 'rgba(0,0,0,0.08)',
                 overflow: 'hidden',
                 flexShrink: 0,
-                boxShadow: `0 0 30px 0 ${hexToRgba(pageColor.bg === '#ffffff' ? '#818cf8' : '#ffffff', 0.5)}, 0 0 60px 0 ${hexToRgba(pageColor.bg === '#ffffff' ? '#818cf8' : '#ffffff', 0.25)}`,
               }}
             >
               <img
@@ -561,7 +617,7 @@ export default function App() {
                     fontFamily: 'MS Sans Serif, Tahoma, sans-serif',
                   }}
                 >
-                  Francisco Chico
+                  Francisco Nogueira
                 </div>
                 {/* Menu bar */}
                 <div
@@ -621,16 +677,7 @@ export default function App() {
             zIndex: 3,
           }}
         >
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-              alignSelf: 'stretch',
-            }}
-          >
+          <h2 className="section-heading" style={{ marginBottom: '24px', alignSelf: 'stretch' }}>
             {t(locale, 'sectionMusic')}
           </h2>
           <div
@@ -683,15 +730,7 @@ export default function App() {
         </section>
 
         <section id="gallery" style={{ marginTop: '80px', position: 'relative', zIndex: 1 }}>
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-            }}
-          >
+          <h2 className="section-heading" style={{ marginBottom: '24px' }}>
             {t(locale, 'sectionGallery')}
           </h2>
           <Gallery locale={locale} />
@@ -708,14 +747,7 @@ export default function App() {
             scrollMarginTop: '72px',
           }}
         >
-          <h2
-            className="content-section-heading section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-            }}
-          >
+          <h2 className="content-section-heading section-heading">
             {t(locale, 'sectionContent')}
           </h2>
           <div className="content-section-body">
@@ -734,31 +766,14 @@ export default function App() {
             alignItems: 'center',
           }}
         >
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-              alignSelf: 'stretch',
-            }}
-          >
+          <h2 className="section-heading" style={{ marginBottom: '24px', alignSelf: 'stretch' }}>
             {t(locale, 'sectionShows')}
           </h2>
           <ShowPictures locale={locale} />
         </section>
 
         <section id="contact" style={{ marginTop: '80px', paddingBottom: '80px', position: 'relative', zIndex: 1 }}>
-          <h2
-            className="section-heading"
-            style={{
-              fontSize: '11px',
-              letterSpacing: '0.2em',
-              textTransform: 'uppercase',
-              marginBottom: '24px',
-            }}
-          >
+          <h2 className="section-heading" style={{ marginBottom: '24px' }}>
             {t(locale, 'sectionContact')}
           </h2>
           <div
@@ -834,6 +849,24 @@ export default function App() {
               }}
             >
               {t(locale, 'contactTiktokLabel')}
+            </a>
+            <a
+              href={CONTACT_LINKS.resume}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="win95-btn"
+              download
+              style={{
+                padding: '8px 16px',
+                fontSize: '11px',
+                textDecoration: 'none',
+                color: '#000',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              {t(locale, 'contactResumeLabel')}
             </a>
           </div>
         </section>
